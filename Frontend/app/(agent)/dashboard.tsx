@@ -195,7 +195,7 @@ function ActionCard({
       {primary ? (
         <LinearGradient
           colors={["#3b82f6", "#2563eb"]}
-          className="rounded-2xl p-5 shadow-lg"
+          className="rounded-xl p-5 shadow-lg"
         >
           <View className="bg-white/20 rounded-xl p-2 self-start mb-3">
             <Ionicons name={icon} size={28} color="white" />
