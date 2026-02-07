@@ -13,6 +13,7 @@ import {
   View,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
+<<<<<<< tejas/operation
 
 const roleTitleMap: Record<string, string> = {
   "(agent)": "Travel Agent",
@@ -32,11 +33,18 @@ const redirectByRole = (role?: string) => {
       return "/(agent)/dashboard"; 
   }
 };
+=======
+import { useLocalSearchParams } from "expo-router";
+import { getUserRole, getDashboardPath } from "../../lib/roleUtils";
+>>>>>>> local
 
 export default function SignIn() {
   const router = useRouter();
   const { role } = useLocalSearchParams<{ role?: string }>();
+<<<<<<< tejas/operation
 
+=======
+>>>>>>> local
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -61,6 +69,14 @@ export default function SignIn() {
   };
 
   const signIn = async () => {
+<<<<<<< tejas/operation
+=======
+    if (!email || !password) {
+      Alert.alert("Missing Fields", "Enter email and password");
+      return;
+    }
+
+>>>>>>> local
     try {
       setErrors({ email: "", password: "" });
 
@@ -77,6 +93,10 @@ export default function SignIn() {
 
       setLoading(true);
 
+<<<<<<< tejas/operation
+=======
+      // Authenticate user
+>>>>>>> local
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
@@ -107,8 +127,20 @@ export default function SignIn() {
         return;
       }
 
+<<<<<<< tejas/operation
       if (data?.user) {
         router.replace(redirectByRole(role));
+=======
+      // Get user role from profile
+      const userRole = await getUserRole();
+
+      if (userRole) {
+        const dashboardPath = getDashboardPath(userRole);
+        router.replace(dashboardPath as any);
+      } else {
+        // Fallback to agent if no role found
+        router.replace("/(agent)/dashboard");
+>>>>>>> local
       }
     } catch (err) {
       console.error(err);

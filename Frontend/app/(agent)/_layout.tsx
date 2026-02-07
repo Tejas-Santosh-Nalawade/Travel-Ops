@@ -24,9 +24,9 @@ export default function AgentLayout() {
       <Tabs.Screen
         name="dashboard"
         options={{
-          title: "Home",
+          title: "Dashboard",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home-outline" size={size} color={color} />
+            <Ionicons name="grid-outline" size={size} color={color} />
           ),
         }}
       />
@@ -36,7 +36,7 @@ export default function AgentLayout() {
         options={{
           title: "Journeys",
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map-outline" size={size} color={color} />
+            <Ionicons name="airplane-outline" size={size} color={color} />
           ),
         }}
       />
@@ -44,30 +44,14 @@ export default function AgentLayout() {
       <Tabs.Screen
         name="create"
         options={{
-          title: "New",
+          title: "Create",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="add-circle" size={40} color={color} />
+            <Ionicons name="add-circle" size={36} color="#2563eb" />
           ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="notifications"
-        options={{
-          title: "Alerts",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="notifications-outline" size={size} color={color} />
-          ),
-        }}
-      />
-
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Profile",
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
+          tabBarLabelStyle: {
+            fontSize: 12,
+            fontWeight: "700",
+          },
         }}
       />
     </Tabs>

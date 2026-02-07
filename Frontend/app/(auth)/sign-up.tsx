@@ -131,12 +131,16 @@ export default function SignUp() {
 
       setIsLoading(true);
 
+      // Parse role from route param (remove parentheses)
+      const userRole = role?.replace(/[()]/g, '').toLowerCase() || 'agent';
+
       const { data, error } = await supabase.auth.signUp({
         email: email.trim().toLowerCase(),
         password,
         options: {
           data: {
             full_name: name.trim(),
+            role: userRole, // Store role in metadata
           },
           emailRedirectTo: "meltdown://auth-callback",
         },
