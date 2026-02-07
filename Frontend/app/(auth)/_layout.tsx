@@ -25,7 +25,7 @@ export default function AuthLayout() {
   if (loading) return null;
 
   if (session) {
-    return <Redirect href="/(asha)/dashboard" />;
+    return <Redirect href="/dashboard" />;
   }
 
   return (
