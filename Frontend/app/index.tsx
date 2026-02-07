@@ -1,49 +1,19 @@
 import { useRouter } from "expo-router";
-import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect } from "react";
+import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../lib/supabase";
 
 export default function Index() {
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    checkAuthAndRedirect();
+    // Redirect to onboarding page on app start
+    const timeout = setTimeout(() => {
+      router.replace("/(auth)/onboarding");
+    }, 100);
+    
+    return () => clearTimeout(timeout);
   }, []);
-
-  const checkAuthAndRedirect = async () => {
-    try {
-      const { data } = await supabase.auth.getSession();
-      
-      if (data.session) {
-        // Check if user has role in metadata, otherwise default to ops
-        const user = data.session.user;
-        const role = user?.user_metadata?.role || 'ops';
-        
-        // Redirect based on role
-        if (role === 'admin') {
-          router.replace("/(admin)/dashboard");
-        } else if (role === 'agent') {
-          router.replace("/(agent)/dashboard");
-        } else {
-          router.replace("/(ops)/dashboard");
-        }
-      }
-    } catch (error) {
-      console.error('Error checking auth:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1 items-center justify-center">
-        <ActivityIndicator size="large" />
-      </SafeAreaView>
-    );
-  }
 
   return (
     <SafeAreaView className="flex-1">

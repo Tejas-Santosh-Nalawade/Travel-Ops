@@ -155,7 +155,7 @@ export default function SignUp() {
             [
               { text: "Cancel", style: "cancel" },
               { text: "Sign In", onPress: () => router.push({
-                pathname: '/sign-in',
+                pathname: '/(auth)/sign-in',
                 params: { role: role },
               }) },
             ]
@@ -177,7 +177,7 @@ export default function SignUp() {
             {
               text: "OK",
               onPress: () => router.push({
-                pathname: '/sign-in',
+                pathname: '/(auth)/sign-in',
                 params: { role: role },
               })
             },
@@ -363,7 +363,7 @@ export default function SignUp() {
               </Text>
               <TouchableOpacity
                 onPress={() => router.push({
-                  pathname: '/sign-in',
+                  pathname: '/(auth)/sign-in',
                   params: { role: role },
                 })}
                 disabled={isLoading}

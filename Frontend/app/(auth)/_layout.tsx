@@ -25,7 +25,8 @@ export default function AuthLayout() {
   if (loading) return null;
 
   if (session) {
-    return <Redirect href="/(asha)/dashboard" />;
+    // Redirect to agent dashboard by default if session exists
+    return <Redirect href="/(agent)/dashboard" />;
   }
 
   return (

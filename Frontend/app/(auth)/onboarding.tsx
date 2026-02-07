@@ -132,7 +132,7 @@ export default function OnboardingRole() {
                 if (!selectedRole) return;
               
                 router.push({
-                  pathname: '/sign-up',
+                  pathname: '/(auth)/sign-up',
                   params: { role: selectedRole },
                 });
               }}

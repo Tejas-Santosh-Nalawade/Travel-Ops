@@ -41,7 +41,7 @@ export default function AdminDashboard() {
   const checkAuth = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) {
-      router.replace('/sign-in')
+      router.replace('/(auth)/onboarding')
       return
     }
     setUser(user)
@@ -92,7 +92,7 @@ export default function AdminDashboard() {
             if (error) {
               Alert.alert('Error', error.message)
             } else {
-              router.replace('/sign-in')
+              router.replace('/(auth)/onboarding')
             }
           }
         }
@@ -113,15 +113,17 @@ export default function AdminDashboard() {
       {/* Header */}
       <View className="bg-white px-4 py-4 border-b border-gray-200">
         <View className="flex-row items-center justify-between">
-          <View>
+          <View className="flex-1">
             <Text className="text-2xl font-bold text-gray-800">Admin Dashboard</Text>
             <Text className="text-sm text-gray-500 mt-1">System Overview & Management</Text>
           </View>
           <TouchableOpacity
             onPress={handleLogout}
-            className="w-10 h-10 rounded-full bg-purple-100 items-center justify-center"
+            className="bg-purple-50 rounded-xl px-4 py-2 flex-row items-center gap-2"
+            activeOpacity={0.7}
           >
             <Ionicons name="log-out-outline" size={20} color="#8b5cf6" />
+            <Text className="text-purple-600 font-semibold">Logout</Text>
           </TouchableOpacity>
         </View>
       </View>

@@ -23,7 +23,7 @@ export default function AgentDashboard() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) {
-        router.replace("/onboarding");
+        router.replace("/(auth)/onboarding");
       } else {
         setUser(data.session.user);
         // Fade in animation
@@ -43,12 +43,12 @@ export default function AgentDashboard() {
     if (error) {
       Alert.alert(error.message);
     } else {
-      router.replace("/onboarding");
+      router.replace("/(auth)/onboarding");
     }
   };
 
   if (loading) return null;
-  if (!user) return <Redirect href="/onboarding" />;
+  if (!user) return <Redirect href="/(auth)/onboarding" />;
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">

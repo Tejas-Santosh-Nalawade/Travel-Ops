@@ -15,6 +15,7 @@ export default function RootLayout() {
         <Stack.Screen name="(agent)" />
         <Stack.Screen name="(ops)" />
         <Stack.Screen name="auth-callback" />
+        <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
 

@@ -9,7 +9,7 @@ export default function Profile() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.replace("/sign-in");
+    router.replace("/(auth)/onboarding");
   };
 
   return (

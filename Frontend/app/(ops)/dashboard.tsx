@@ -212,6 +212,20 @@ export default function Dashboard() {
     }
   };
 
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        Alert.alert('Error', 'Failed to logout');
+      } else {
+        router.replace('/(auth)/onboarding');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      Alert.alert('Error', 'An error occurred during logout');
+    }
+  };
+
   const onRefresh = () => {
     setRefreshing(true);
     loadDashboardData();
@@ -680,6 +694,24 @@ export default function Dashboard() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
+      {/* Header with Logout */}
+      <View className="bg-white border-b border-gray-200 px-4 py-3">
+        <View className="flex-row items-center justify-between">
+          <View className="flex-1">
+            <Text className="text-xl font-bold text-gray-900">Operations Dashboard</Text>
+            <Text className="text-xs text-gray-500 mt-0.5">Monitor and manage all journeys</Text>
+          </View>
+          <TouchableOpacity
+            onPress={handleLogout}
+            className="bg-red-50 rounded-xl px-4 py-2 flex-row items-center gap-2"
+            activeOpacity={0.7}
+          >
+            <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+            <Text className="text-red-600 font-semibold">Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* Tab Navigation */}
       <View className="bg-white border-b border-gray-200">
         <ScrollView horizontal showsHorizontalScrollIndicator={false} className="px-2">

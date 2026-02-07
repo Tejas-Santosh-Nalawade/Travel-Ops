@@ -28,11 +28,11 @@ export default function AuthCallback() {
           router.replace("/(agent)/dashboard");
         }
       } else {
-        router.replace("/(auth)/sign-in");
+        router.replace("/(auth)/onboarding");
       }
     } catch (error) {
       console.error('Auth callback error:', error);
-      router.replace("/(auth)/sign-in");
+      router.replace("/(auth)/onboarding");
     }
   };
 
