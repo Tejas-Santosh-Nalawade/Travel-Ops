@@ -10,7 +10,7 @@ export default function AuthCallback() {
     // Supabase auto-exchanges token from deep link
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        router.replace("/(asha)/dashboard");
+        router.replace("/(agent)/dashboard");
       } else {
         router.replace("/(auth)/sign-in");
       }

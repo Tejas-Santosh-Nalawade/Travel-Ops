@@ -11,7 +11,7 @@ export default function Index() {
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       if (data.session) {
-        router.replace("/(asha)/dashboard");
+        router.replace("/(agent)/dashboard");
       }
       setLoading(false);
     });
