@@ -1,25 +1,45 @@
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { supabase } from "../lib/supabase";
+import { getUserRole, getDashboardPath } from "../lib/roleUtils";
 
 export default function AuthCallback() {
   const router = useRouter();
 
   useEffect(() => {
-    // Supabase auto-exchanges token from deep link
-    supabase.auth.getSession().then(({ data }) => {
+    handleAuthCallback();
+  }, []);
+
+  const handleAuthCallback = async () => {
+    try {
+      // Supabase auto-exchanges token from deep link
+      const { data } = await supabase.auth.getSession();
+      
       if (data.session) {
-        router.replace("/(agent)/dashboard");
+        // Get user role and redirect to appropriate dashboard
+        const role = await getUserRole();
+        
+        if (role) {
+          const dashboardPath = getDashboardPath(role);
+          router.replace(dashboardPath as any);
+        } else {
+          // Default to agent if no role found
+          router.replace("/(agent)/dashboard");
+        }
       } else {
         router.replace("/(auth)/sign-in");
       }
-    });
-  }, []);
+    } catch (error) {
+      console.error('Auth callback error:', error);
+      router.replace("/(auth)/sign-in");
+    }
+  };
 
   return (
-    <View className="flex-1 items-center justify-center">
-      <Text>Verifying...</Text>
+    <View className="flex-1 items-center justify-center bg-gray-50">
+      <ActivityIndicator size="large" color="#3B82F6" />
+      <Text className="mt-4 text-gray-600">Verifying...</Text>
     </View>
   );
 }

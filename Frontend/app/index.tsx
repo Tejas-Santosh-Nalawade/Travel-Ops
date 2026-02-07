@@ -9,13 +9,33 @@ export default function Index() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        router.replace("/(agent)/dashboard");
-      }
-      setLoading(false);
-    });
+    checkAuthAndRedirect();
   }, []);
+
+  const checkAuthAndRedirect = async () => {
+    try {
+      const { data } = await supabase.auth.getSession();
+      
+      if (data.session) {
+        // Check if user has role in metadata, otherwise default to ops
+        const user = data.session.user;
+        const role = user?.user_metadata?.role || 'ops';
+        
+        // Redirect based on role
+        if (role === 'admin') {
+          router.replace("/(admin)/dashboard");
+        } else if (role === 'agent') {
+          router.replace("/(agent)/dashboard");
+        } else {
+          router.replace("/(ops)/dashboard");
+        }
+      }
+    } catch (error) {
+      console.error('Error checking auth:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (

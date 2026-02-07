@@ -13,7 +13,11 @@ import {
   View,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
+<<<<<<< HEAD
+<<<<<<< tejas/operation
+=======
 import { useLocalSearchParams} from "expo-router";
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
 
 /* ================= ROLE REDIRECT ================= */
 
@@ -29,10 +33,22 @@ const redirectByRole = (role: string) => {
       return "/(agent)/dashboard";
   }
 };
+=======
+import { useLocalSearchParams } from "expo-router";
+import { getUserRole, getDashboardPath } from "../../lib/roleUtils";
+>>>>>>> local
 
 export default function SignIn() {
   const router = useRouter();
+<<<<<<< HEAD
+  const { role } = useLocalSearchParams<{ role?: string }>();
+<<<<<<< tejas/operation
+
+=======
+>>>>>>> local
+=======
   const  {role} = useLocalSearchParams<{ role?: string }>();
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -41,16 +57,32 @@ export default function SignIn() {
   /* ================= SIGN IN ================= */
 
   const signIn = async () => {
+<<<<<<< HEAD
+<<<<<<< tejas/operation
+=======
+=======
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
     if (!email || !password) {
       Alert.alert("Missing Fields", "Enter email and password");
       return;
     }
 
+<<<<<<< HEAD
+>>>>>>> local
+=======
 
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
     try {
       setLoading(true);
 
+<<<<<<< HEAD
+<<<<<<< tejas/operation
+=======
+      // Authenticate user
+>>>>>>> local
+=======
       // 1️⃣ AUTHENTICATE (NO ROLE HERE)
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
@@ -61,10 +93,27 @@ export default function SignIn() {
         return;
       }
 
+<<<<<<< HEAD
+<<<<<<< tejas/operation
+      if (data?.user) {
+        router.replace(redirectByRole(role));
+=======
+      // Get user role from profile
+      const userRole = await getUserRole();
+
+      if (userRole) {
+        const dashboardPath = getDashboardPath(userRole);
+        router.replace(dashboardPath as any);
+      } else {
+        // Fallback to agent if no role found
+        router.replace("/(agent)/dashboard");
+>>>>>>> local
+=======
       console.log(role);
       if (!role) {
         Alert.alert("Role Missing", "Role not found in user metadata");
         return;
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
       }
 
       // 3️⃣ REDIRECT
