@@ -18,6 +18,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { travelOrchestrator } from '../../../services/orchestratorAPI';
+import { creditCardService } from '../../../services/creditCardAPI';
 
 type RecommendationType = 'budget' | 'multi_city' | 'quick';
 
@@ -27,6 +28,7 @@ export default function AIRecommendations() {
   const [loading, setLoading] = useState(false);
   const [travelPlan, setTravelPlan] = useState<any>(null);
   const [insights, setInsights] = useState<any>(null);
+  const [cardRecommendations, setCardRecommendations] = useState<any>(null);
   const fadeAnim = useState(new Animated.Value(0))[0];
 
   // Budget form
@@ -62,6 +64,7 @@ export default function AIRecommendations() {
       setLoading(true);
       setTravelPlan(null);
       setInsights(null);
+      setCardRecommendations(null);
 
       const budget = (parseFloat(budgetMin) + parseFloat(budgetMax)) / 2;
 
@@ -93,6 +96,21 @@ export default function AIRecommendations() {
       setTravelPlan(result.travel_plan);
       setInsights(result.insights);
 
+      // Get credit card recommendations for this trip
+      try {
+        const cities = [...new Set(result.travel_plan.itinerary.map((leg: any) => leg.to_city))];
+        const cardRecs = await creditCardService.recommendForTrip(
+          result.travel_plan.budget_breakdown.total_budget,
+          cities,
+          result.travel_plan.total_duration_days,
+          result.travel_plan.total_travelers
+        );
+        setCardRecommendations(cardRecs);
+      } catch (cardError) {
+        console.error('Failed to get card recommendations:', cardError);
+        // Continue even if card recommendations fail
+      }
+
       Alert.alert(
         result.ui_summary?.title || 'Success!',
         result.ui_summary?.summary || 'AI-powered travel plan created!'
@@ -115,6 +133,7 @@ export default function AIRecommendations() {
       setLoading(true);
       setTravelPlan(null);
       setInsights(null);
+      setCardRecommendations(null);
 
       const daysPerCity = Math.floor(parseInt(travelDays) / cities.length);
       let currentDate = new Date();
@@ -148,6 +167,20 @@ export default function AIRecommendations() {
       setTravelPlan(result.travel_plan);
       setInsights(result.insights);
 
+      // Get credit card recommendations for this trip
+      try {
+        const tripCities = [...new Set(result.travel_plan.itinerary.map((leg: any) => leg.to_city))];
+        const cardRecs = await creditCardService.recommendForTrip(
+          result.travel_plan.budget_breakdown.total_budget,
+          tripCities,
+          result.travel_plan.total_duration_days,
+          result.travel_plan.total_travelers
+        );
+        setCardRecommendations(cardRecs);
+      } catch (cardError) {
+        console.error('Failed to get card recommendations:', cardError);
+      }
+
       Alert.alert(
         result.ui_summary?.title || 'Success!',
         result.ui_summary?.summary || 'AI-optimized multi-city plan ready!'
@@ -170,6 +203,7 @@ export default function AIRecommendations() {
       setLoading(true);
       setTravelPlan(null);
       setInsights(null);
+      setCardRecommendations(null);
 
       const result = await travelOrchestrator.createEnhancedPlan({
         customer_name: 'Quick Traveler',
@@ -198,6 +232,20 @@ export default function AIRecommendations() {
       setTravelPlan(result.travel_plan);
       setInsights(result.insights);
 
+      // Get credit card recommendations for this trip
+      try {
+        const tripCities = [...new Set(result.travel_plan.itinerary.map((leg: any) => leg.to_city))];
+        const cardRecs = await creditCardService.recommendForTrip(
+          result.travel_plan.budget_breakdown.total_budget,
+          tripCities,
+          result.travel_plan.total_duration_days,
+          result.travel_plan.total_travelers
+        );
+        setCardRecommendations(cardRecs);
+      } catch (cardError) {
+        console.error('Failed to get card recommendations:', cardError);
+      }
+
       Alert.alert(
         result.ui_summary?.title || 'Success!',
         result.ui_summary?.summary || 'Quick trip plan ready!'
@@ -216,11 +264,7 @@ export default function AIRecommendations() {
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
-      <LinearGradient
-        colors={['#6366f1', '#8b5cf6', '#ec4899']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        className="px-6 py-6 pb-8"
+      <View className="bg-blue-500 px-6 py-4 "
       >
         <View className="flex-row items-center mb-4">
           <TouchableOpacity onPress={() => router.back()} className="mr-3">
@@ -230,10 +274,10 @@ export default function AIRecommendations() {
             <Text className="text-3xl font-extrabold text-white mb-1">
               AI Travel Planner 🤖
             </Text>
-            <Text className="text-purple-100 text-sm">Powered by Groq LLM</Text>
+            <Text className="text-blue-100 text-sm">Powered by Groq LLM</Text>
           </View>
         </View>
-      </LinearGradient>
+        </View>
 
       <Animated.ScrollView className="flex-1" style={{ opacity: fadeAnim }} showsVerticalScrollIndicator={false}>
         {/* Recommendation Type Selector */}
@@ -587,6 +631,7 @@ export default function AIRecommendations() {
               onPress={() => {
                 setTravelPlan(null);
                 setInsights(null);
+                setCardRecommendations(null);
                 setActiveType(null);
               }}
               className="mb-6"
@@ -603,7 +648,7 @@ export default function AIRecommendations() {
             </TouchableOpacity>
 
             {/* Summary Card - What You'll Pay */}
-            <View className="bg-gradient-to-br from-blue-600 to-purple-600 rounded-3xl p-6 mb-6 shadow-2xl">
+            <View className="bg-blue-600 rounded-3xl p-6 mb-6 shadow-2xl">
               <Text className="text-white text-sm font-semibold mb-2 opacity-90">
                 YOUR TRIP SUMMARY
               </Text>
@@ -872,6 +917,151 @@ export default function AIRecommendations() {
                     </Text>
                   </View>
                 )}
+              </View>
+            )}
+
+            {/* Credit Card Recommendations */}
+            {cardRecommendations && cardRecommendations.best_cards && cardRecommendations.best_cards.length > 0 && (
+              <View className="bg-white rounded-3xl p-6 mb-4 shadow-lg border-2 border-green-200">
+                <View className="flex-row items-center mb-4">
+                  <View className="bg-green-100 rounded-full p-3 mr-3">
+                    <Ionicons name="card" size={28} color="#10b981" />
+                  </View>
+                  <View className="flex-1">
+                    <Text className="text-2xl font-extrabold text-gray-900">
+                      💳 Best Cards for This Trip
+                    </Text>
+                    <Text className="text-green-600 text-sm font-semibold mt-1">
+                      Save up to {formatPrice(cardRecommendations.max_savings)} on this trip!
+                    </Text>
+                  </View>
+                </View>
+
+                {cardRecommendations.best_cards.map((rec: any, index: number) => (
+                  <View key={index} className="mb-4 bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-5 border border-green-200">
+                    {/* Card Header */}
+                    <View className="flex-row items-start justify-between mb-3">
+                      <View className="flex-1">
+                        <Text className="text-xl font-extrabold text-gray-900 mb-1">
+                          {rec.card.card_name}
+                        </Text>
+                        <Text className="text-green-700 text-xs uppercase tracking-wide font-bold">
+                          {rec.card.card_tier} • {rec.card.card_type}
+                        </Text>
+                      </View>
+                      <View className="bg-green-600 px-3 py-1 rounded-full">
+                        <Text className="text-white text-xs font-extrabold">#{index + 1}</Text>
+                      </View>
+                    </View>
+
+                    {/* Trip Savings */}
+                    <View className="bg-white rounded-2xl p-4 mb-3 shadow-sm">
+                      <View className="flex-row items-center justify-between mb-2">
+                        <Text className="text-gray-700 font-semibold">You'll Save:</Text>
+                        <Text className="text-green-600 text-2xl font-extrabold">
+                          {formatPrice(rec.for_this_trip.total_savings)}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center justify-between mb-1">
+                        <Text className="text-gray-600 text-sm">Original Cost:</Text>
+                        <Text className="text-gray-600 text-sm line-through">
+                          {formatPrice(rec.for_this_trip.trip_cost)}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-center justify-between">
+                        <Text className="text-gray-900 font-bold">Final Cost:</Text>
+                        <Text className="text-gray-900 font-extrabold text-lg">
+                          {formatPrice(rec.for_this_trip.net_cost)}
+                        </Text>
+                      </View>
+                    </View>
+
+                    {/* Breakdown */}
+                    <View className="mb-3">
+                      <Text className="text-gray-800 font-bold mb-2 text-sm">💰 Savings Breakdown:</Text>
+                      <View className="space-y-1">
+                        {rec.for_this_trip.points_earned > 0 && (
+                          <View className="flex-row items-center justify-between bg-blue-50 px-3 py-2 rounded-lg">
+                            <View className="flex-row items-center">
+                              <Ionicons name="star" size={14} color="#3b82f6" />
+                              <Text className="ml-2 text-gray-700 text-sm">Reward Points</Text>
+                            </View>
+                            <Text className="text-blue-600 font-bold text-sm">
+                              {rec.for_this_trip.points_earned.toFixed(0)} pts
+                            </Text>
+                          </View>
+                        )}
+                        {rec.for_this_trip.cashback_earned > 0 && (
+                          <View className="flex-row items-center justify-between bg-green-50 px-3 py-2 rounded-lg">
+                            <View className="flex-row items-center">
+                              <Ionicons name="cash" size={14} color="#10b981" />
+                              <Text className="ml-2 text-gray-700 text-sm">Cashback</Text>
+                            </View>
+                            <Text className="text-green-600 font-bold text-sm">
+                              {formatPrice(rec.for_this_trip.cashback_earned)}
+                            </Text>
+                          </View>
+                        )}
+                        {rec.for_this_trip.offer_savings > 0 && (
+                          <View className="flex-row items-center justify-between bg-orange-50 px-3 py-2 rounded-lg">
+                            <View className="flex-row items-center">
+                              <Ionicons name="gift" size={14} color="#f59e0b" />
+                              <Text className="ml-2 text-gray-700 text-sm">Special Offers</Text>
+                            </View>
+                            <Text className="text-orange-600 font-bold text-sm">
+                              {formatPrice(rec.for_this_trip.offer_savings)}
+                            </Text>
+                          </View>
+                        )}
+                        <View className="flex-row items-center justify-between bg-purple-50 px-3 py-2 rounded-lg mt-1">
+                          <Text className="text-purple-900 font-bold text-sm">Effective Discount</Text>
+                          <Text className="text-purple-600 font-extrabold text-sm">
+                            {rec.for_this_trip.effective_discount_percent.toFixed(1)}%
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+
+                    {/* Why Best */}
+                    <View className="bg-blue-50 rounded-xl p-3 mb-3">
+                      <Text className="text-gray-800 font-bold mb-1 text-sm">✨ Why This Card:</Text>
+                      <Text className="text-gray-700 text-sm">{rec.why_best}</Text>
+                    </View>
+
+                    {/* Active Offers */}
+                    {rec.active_offers && rec.active_offers.length > 0 && (
+                      <View className="mb-3">
+                        <Text className="text-gray-800 font-bold mb-2 text-sm">🎉 Active Offers:</Text>
+                        {rec.active_offers.map((offer: any, i: number) => (
+                          <View key={i} className="bg-orange-50 rounded-lg p-3 mb-2">
+                            <Text className="text-orange-900 font-semibold text-sm">
+                              {offer.merchant} - {offer.discount_percent}% OFF
+                            </Text>
+                            <Text className="text-orange-700 text-xs">
+                              Max discount: {formatPrice(offer.max_discount)}
+                            </Text>
+                            <Text className="text-orange-600 text-xs">{offer.terms}</Text>
+                          </View>
+                        ))}
+                      </View>
+                    )}
+
+                    {/* Terms */}
+                    {rec.terms && rec.terms.length > 0 && (
+                      <View className="border-t border-green-200 pt-3">
+                        <Text className="text-gray-700 text-xs">
+                          {rec.terms.join(' • ')}
+                        </Text>
+                      </View>
+                    )}
+                  </View>
+                ))}
+
+                <View className="bg-green-50 rounded-xl p-4 mt-2">
+                  <Text className="text-green-900 font-bold text-sm text-center">
+                    💡 Use the right card to maximize savings on your trip!
+                  </Text>
+                </View>
               </View>
             )}
 
