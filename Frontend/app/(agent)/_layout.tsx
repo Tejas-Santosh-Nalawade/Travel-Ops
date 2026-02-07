@@ -42,11 +42,35 @@ export default function AgentLayout() {
       />
 
       <Tabs.Screen
-        name="create"
+        name="Create"
         options={{
           title: "Create",
           tabBarIcon: ({ color }) => (
+<<<<<<< HEAD
             <Ionicons name="add-circle" size={36} color="#2563eb" />
+=======
+            <Ionicons name="add-circle" size={30} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="notifications"
+        options={{
+          title: "Alerts",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="notifications-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          tabBarIcon: ({ color, size }) => (
+            <Ionicons name="person-outline" size={size} color={color} />
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
           ),
           tabBarLabelStyle: {
             fontSize: 12,

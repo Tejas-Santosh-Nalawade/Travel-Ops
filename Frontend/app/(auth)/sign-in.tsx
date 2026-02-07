@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import {
   ActivityIndicator,
@@ -13,15 +13,15 @@ import {
   View,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
+<<<<<<< HEAD
 <<<<<<< tejas/operation
+=======
+import { useLocalSearchParams} from "expo-router";
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
 
-const roleTitleMap: Record<string, string> = {
-  "(agent)": "Travel Agent",
-  "(ops)": "Operations",
-  "(admin)": "Administrator",
-};
+/* ================= ROLE REDIRECT ================= */
 
-const redirectByRole = (role?: string) => {
+const redirectByRole = (role: string) => {
   switch (role) {
     case "(agent)":
       return "/(agent)/dashboard";
@@ -30,7 +30,7 @@ const redirectByRole = (role?: string) => {
     case "(admin)":
       return "/(admin)/dashboard";
     default:
-      return "/(agent)/dashboard"; 
+      return "/(agent)/dashboard";
   }
 };
 =======
@@ -40,93 +40,60 @@ import { getUserRole, getDashboardPath } from "../../lib/roleUtils";
 
 export default function SignIn() {
   const router = useRouter();
+<<<<<<< HEAD
   const { role } = useLocalSearchParams<{ role?: string }>();
 <<<<<<< tejas/operation
 
 =======
 >>>>>>> local
+=======
+  const  {role} = useLocalSearchParams<{ role?: string }>();
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [errors, setErrors] = useState({
-    email: "",
-    password: "",
-  });
+  const [loading, setLoading] = useState(false);
 
-  // Email validation
-  const validateEmail = (email: string): boolean => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-  };
-
-  const handleEmailBlur = () => {
-    if (email && !validateEmail(email)) {
-      setErrors((prev) => ({ ...prev, email: "Please enter a valid email" }));
-    } else {
-      setErrors((prev) => ({ ...prev, email: "" }));
-    }
-  };
+  /* ================= SIGN IN ================= */
 
   const signIn = async () => {
+<<<<<<< HEAD
 <<<<<<< tejas/operation
 =======
+=======
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
     if (!email || !password) {
       Alert.alert("Missing Fields", "Enter email and password");
       return;
     }
 
+<<<<<<< HEAD
 >>>>>>> local
+=======
+
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
     try {
-      setErrors({ email: "", password: "" });
-
-      if (!email || !password) {
-        Alert.alert("Missing Fields", "Please enter both email and password");
-        return;
-      }
-
-      if (!validateEmail(email)) {
-        setErrors((prev) => ({ ...prev, email: "Invalid email format" }));
-        Alert.alert("Invalid Email", "Please enter a valid email address");
-        return;
-      }
-
       setLoading(true);
 
+<<<<<<< HEAD
 <<<<<<< tejas/operation
 =======
       // Authenticate user
 >>>>>>> local
+=======
+      // 1️⃣ AUTHENTICATE (NO ROLE HERE)
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email.trim().toLowerCase(),
         password,
       });
 
-      if (error) {
-        if (error.message.includes("Invalid login credentials")) {
-          setErrors({
-            email: "Invalid credentials",
-            password: "Invalid credentials",
-          });
-          Alert.alert(
-            "Sign In Failed",
-            "The email or password you entered is incorrect."
-          );
-          return;
-        }
-
-        if (error.message.includes("Email not confirmed")) {
-          Alert.alert(
-            "Email Not Verified",
-            "Please verify your email before signing in."
-          );
-          return;
-        }
-
-        Alert.alert("Sign In Error", error.message);
+      if (error || !data?.user) {
+        Alert.alert("Sign In Failed", error?.message ?? "Unknown error");
         return;
       }
 
+<<<<<<< HEAD
 <<<<<<< tejas/operation
       if (data?.user) {
         router.replace(redirectByRole(role));
@@ -141,28 +108,32 @@ export default function SignIn() {
         // Fallback to agent if no role found
         router.replace("/(agent)/dashboard");
 >>>>>>> local
+=======
+      console.log(role);
+      if (!role) {
+        Alert.alert("Role Missing", "Role not found in user metadata");
+        return;
+>>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
       }
+
+      // 3️⃣ REDIRECT
+      router.replace(redirectByRole(role));
     } catch (err) {
       console.error(err);
-      Alert.alert(
-        "Connection Error",
-        "Please check your internet connection."
-      );
+      Alert.alert("Network Error", "Please try again");
     } finally {
       setLoading(false);
     }
   };
+
+  /* ================= UI ================= */
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       className="flex-1 bg-gradient-to-br from-blue-50 to-indigo-50"
     >
-      <ScrollView
-        contentContainerClassName="flex-grow justify-center"
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerClassName="flex-grow justify-center">
         <View className="px-8 py-12">
           {/* Header */}
           <View className="mb-10">
@@ -170,101 +141,55 @@ export default function SignIn() {
               Welcome Back
             </Text>
             <Text className="text-lg text-gray-600">
-              Sign in as {roleTitleMap[role ?? "(agent)"]}
+              Sign in to continue
             </Text>
           </View>
 
-          {/* Form */}
-          <View className="gap-5">
-            {/* Email */}
-            <View>
-              <Text className="text-sm font-medium text-gray-700 mb-2">
-                Email Address
-              </Text>
-              <TextInput
-                placeholder="you@example.com"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={email}
-                onChangeText={setEmail}
-                onBlur={handleEmailBlur}
-                editable={!loading}
-                className={`border ${
-                  errors.email ? "border-red-500" : "border-gray-300"
-                } rounded-2xl px-5 py-4 bg-white`}
-              />
-              {errors.email ? (
-                <Text className="text-red-500 text-sm mt-1">
-                  {errors.email}
-                </Text>
-              ) : null}
-            </View>
+          {/* Email */}
+          <TextInput
+            placeholder="Email"
+            autoCapitalize="none"
+            keyboardType="email-address"
+            value={email}
+            onChangeText={setEmail}
+            className="border border-gray-300 rounded-2xl px-5 py-4 bg-white mb-4"
+          />
 
-            {/* Password */}
-            <View>
-              <View className="flex-row justify-between mb-2">
-                <Text className="text-sm font-medium text-gray-700">
-                  Password
-                </Text>
-              </View>
-              <View className="relative">
-                <TextInput
-                  placeholder="Enter your password"
-                  secureTextEntry={!showPassword}
-                  value={password}
-                  onChangeText={setPassword}
-                  editable={!loading}
-                  className={`border ${
-                    errors.password ? "border-red-500" : "border-gray-300"
-                  } rounded-2xl px-5 py-4 pr-12 bg-white`}
-                />
-                <TouchableOpacity
-                  onPress={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-4"
-                >
-                  <Text className="text-gray-500">
-                    {showPassword ? "Hide" : "Show"}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Sign In Button */}
-            <Pressable
-              disabled={loading}
-              onPress={signIn}
-              className={`${
-                loading ? "bg-blue-400" : "bg-blue-600"
-              } py-4 rounded-2xl items-center`}
+          {/* Password */}
+          <View className="relative mb-6">
+            <TextInput
+              placeholder="Password"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+              className="border border-gray-300 rounded-2xl px-5 py-4 pr-12 bg-white"
+            />
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              className="absolute right-4 top-4"
             >
-              {loading ? (
-                <ActivityIndicator color="white" />
-              ) : (
-                <Text className="text-white font-bold text-lg">
-                  Sign In
-                </Text>
-              )}
-            </Pressable>
-
-            {/* Sign Up */}
-            <View className="flex-row justify-center">
-              <Text className="text-gray-600">
-                Don’t have an account?{" "}
+              <Text className="text-gray-500">
+                {showPassword ? "Hide" : "Show"}
               </Text>
-              <TouchableOpacity
-                onPress={() =>
-                  router.push({
-                    pathname: "/sign-up",
-                    params: { role },
-                  })
-                }
-              >
-                <Text className="text-blue-600 font-semibold">
-                  Sign Up
-                </Text>
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
+
+          {/* Button */}
+          <Pressable
+            onPress={signIn}
+            disabled={loading}
+            className={`py-4 rounded-2xl items-center ${
+              loading ? "bg-blue-400" : "bg-blue-600"
+            }`}
+          >
+            {loading ? (
+              <ActivityIndicator color="white" />
+            ) : (
+              <Text className="text-white font-bold text-lg">
+                Sign In
+              </Text>
+            )}
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

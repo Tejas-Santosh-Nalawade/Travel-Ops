@@ -154,7 +154,10 @@ export default function SignUp() {
             "This email is already registered. Would you like to sign in instead?",
             [
               { text: "Cancel", style: "cancel" },
-              { text: "Sign In", onPress: () => router.replace("/sign-in") },
+              { text: "Sign In", onPress: () => router.push({
+                pathname: '/sign-in',
+                params: { role: role },
+              }) },
             ]
           );
         } else if (error.message.includes("invalid email")) {
@@ -173,7 +176,10 @@ export default function SignUp() {
           [
             {
               text: "OK",
-              onPress: () => router.replace("/sign-in"),
+              onPress: () => router.push({
+                pathname: '/sign-in',
+                params: { role: role },
+              })
             },
           ]
         );
@@ -356,7 +362,10 @@ export default function SignUp() {
                 Already have an account?{" "}
               </Text>
               <TouchableOpacity
-                onPress={() => router.push("/sign-in")}
+                onPress={() => router.push({
+                  pathname: '/sign-in',
+                  params: { role: role },
+                })}
                 disabled={isLoading}
               >
                 <Text className="text-blue-600 font-semibold text-base">
