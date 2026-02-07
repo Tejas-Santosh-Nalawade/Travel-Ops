@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   Text,
@@ -9,8 +9,11 @@ import {
   TouchableOpacity,
   View,
   Modal,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { supabase } from "../../../lib/supabase";
 
 type TripType = "one-way" | "round-trip" | "multi-city";
 type TripPurpose = "business" | "tourist";
@@ -25,10 +28,78 @@ export default function NewJourney() {
   const [showCalendar, setShowCalendar] = useState(false);
   const [startDate, setStartDate] = useState<Date | null>(null);
   const [endDate, setEndDate] = useState<Date | null>(null);
+  const [customerName, setSetCustomerName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    // Navigate to journeys after creating
-    router.push("/(agent)/Create/selectjourney");
+  useEffect(() => {
+    loadUser();
+  }, []);
+
+  const loadUser = async () => {
+    const { data } = await supabase.auth.getUser();
+    setUserId(data.user?.id || null);
+  };
+
+  const handleSubmit = async () => {
+    // Validation
+    if (!customerName.trim()) {
+      Alert.alert("Customer Name Required", "Please enter the customer name");
+      return;
+    }
+    if (!sourceCity.trim() || !destinationCity.trim()) {
+      Alert.alert("Cities Required", "Please enter source and destination cities");
+      return;
+    }
+    if (!startDate) {
+      Alert.alert("Travel Date Required", "Please select travel dates");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      // Create journey in database
+      const { data: journey, error } = await supabase
+        .from('journeys')
+        .insert({
+          customer_name: customerName.trim(),
+          created_by: userId,
+          status: 'DRAFT',
+          total_cost: 0,
+          cities: [sourceCity, destinationCity],
+          dates: {
+            start: startDate.toISOString(),
+            end: endDate?.toISOString() || startDate.toISOString(),
+          },
+          preferences: {
+            tripType,
+            tripPurpose,
+            travelers,
+          }
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      Alert.alert(
+        "Journey Created!",
+        `Journey for ${customerName} has been created successfully.`,
+        [
+          {
+            text: "OK",
+            onPress: () => router.push("/(agent)/Create/selectjourney")
+          }
+        ]
+      );
+
+    } catch (error: any) {
+      console.error('Error creating journey:', error);
+      Alert.alert("Error", error.message || "Failed to create journey");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const formatDate = (date: Date) => {
@@ -75,6 +146,26 @@ export default function NewJourney() {
           <Text className="text-gray-500 mb-6">
             Let's plan your perfect journey
           </Text>
+
+          {/* ===== CUSTOMER NAME ===== */}
+          <View className="mb-6">
+            <Text className="text-sm font-semibold text-gray-700 mb-3">
+              Customer Name
+            </Text>
+            <View className="bg-white rounded-2xl border border-gray-200 flex-row items-center px-4 py-4 shadow-sm">
+              <View className="w-10 h-10 rounded-xl bg-indigo-50 items-center justify-center mr-3">
+                <Ionicons name="person" size={20} color="#6366f1" />
+              </View>
+              <TextInput
+                placeholder="Enter customer's full name"
+                placeholderTextColor="#9ca3af"
+                value={customerName}
+                onChangeText={setSetCustomerName}
+                className="flex-1 text-base text-gray-900 font-medium"
+                autoCapitalize="words"
+              />
+            </View>
+          </View>
 
           {/* ===== TRIP TYPE ===== */}
           <View className="mb-6">
@@ -243,18 +334,25 @@ export default function NewJourney() {
           onPress={handleSubmit}
           activeOpacity={0.8}
           className="overflow-hidden rounded-2xl shadow-lg"
+          disabled={loading}
         >
           <LinearGradient
-            colors={["#3b82f6", "#2563eb"]}
+            colors={loading ? ["#9ca3af", "#6b7280"] : ["#3b82f6", "#2563eb"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 1 }}
             className="py-4 px-6"
           >
             <View className="flex-row items-center justify-center">
-              <Text className="text-white text-lg font-bold mr-2">
-                Create Journey
-              </Text>
-              <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+              {loading ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <>
+                  <Text className="text-white text-lg font-bold mr-2">
+                    Create Journey
+                  </Text>
+                  <Ionicons name="checkmark-circle" size={20} color="#ffffff" />
+                </>
+              )}
             </View>
           </LinearGradient>
         </TouchableOpacity>

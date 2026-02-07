@@ -18,6 +18,12 @@ export default function AgentDashboard() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const fadeAnim = useState(new Animated.Value(0))[0];
+  const [stats, setStats] = useState({
+    active: 0,
+    escalated: 0,
+    completed: 0,
+  });
+  const [recentJourneys, setRecentJourneys] = useState<any[]>([]);
 
   // ✅ Session check
   useEffect(() => {
@@ -26,6 +32,7 @@ export default function AgentDashboard() {
         router.replace("/(auth)/onboarding");
       } else {
         setUser(data.session.user);
+        loadDashboardData(data.session.user.id);
         // Fade in animation
         Animated.timing(fadeAnim, {
           toValue: 1,
@@ -37,6 +44,43 @@ export default function AgentDashboard() {
     });
   }, []);
 
+  // Load dashboard data
+  const loadDashboardData = async (userId: string) => {
+    try {
+      // Get today's stats
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const { data: journeysData, error: journeysError } = await supabase
+        .from('journeys')
+        .select('id, customer_name, status, total_cost, created_at')
+        .gte('created_at', today.toISOString())
+        .order('created_at', { ascending: false });
+
+      if (journeysError) throw journeysError;
+
+      // Calculate stats
+      const active = journeysData?.filter(j => j.status === 'PENDING' || j.status === 'DRAFT').length || 0;
+      const escalated = journeysData?.filter(j => j.status === 'FAILED' || j.status === 'ON_HOLD').length || 0;
+      const completed = journeysData?.filter(j => j.status === 'CONFIRMED').length || 0;
+
+      setStats({ active, escalated, completed });
+
+      // Get recent journeys (last 24 hours)
+      const { data: recentData, error: recentError } = await supabase
+        .from('journeys')
+        .select('id, customer_name, status, total_cost, created_at')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (recentError) throw recentError;
+      setRecentJourneys(recentData || []);
+
+    } catch (error: any) {
+      console.error('Error loading dashboard data:', error.message);
+    }
+  };
+
   // ✅ Logout
   const handleLogout = async () => {
     const { error } = await supabase.auth.signOut();
@@ -45,6 +89,20 @@ export default function AgentDashboard() {
     } else {
       router.replace("/(auth)/onboarding");
     }
+  };
+
+  // Helper function to calculate time ago
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInMs = now.getTime() - date.getTime();
+    const diffInMins = Math.floor(diffInMs / 60000);
+    const diffInHours = Math.floor(diffInMins / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+
+    if (diffInMins < 60) return `${diffInMins} min ago`;
+    if (diffInHours < 24) return `${diffInHours} hour${diffInHours > 1 ? 's' : ''} ago`;
+    return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
   };
 
   if (loading) return null;
@@ -100,20 +158,132 @@ export default function AgentDashboard() {
               Quick Actions
             </Text>
 
-            <View className="flex-row gap-3">
-              <ActionCard
-                title="New Journey"
-                subtitle="Create"
-                icon="add-circle"
-                onPress={() => router.push("/(agent)/Create/create")}
-                primary
-              />
-              <ActionCard
-                title="My Journeys"
-                subtitle="View All"
-                icon="map"
-                onPress={() => router.push("/(agent)/journeys")}
-              />
+            {/* Action Buttons Grid */}
+            <View className="flex-row flex-wrap -mx-2">
+              {/* Create Journey */}
+              <View className="w-1/2 px-2 mb-3">
+                <TouchableOpacity
+                  onPress={() => router.push("/Create/create")}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={["#3b82f6", "#2563eb"]}
+                    className="rounded-2xl p-4 shadow-lg"
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
+                      <Ionicons name="add-circle" size={28} color="#ffffff" />
+                    </View>
+                    <Text className="text-white font-bold text-base">
+                      New Journey
+                    </Text>
+                    <Text className="text-blue-100 text-xs mt-1">
+                      Create booking
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+
+              {/* Budget Packages */}
+              <View className="w-1/2 px-2 mb-3">
+                <TouchableOpacity
+                  onPress={() => router.push("/budget-packages" as any)}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={["#a855f7", "#9333ea"]}
+                    className="rounded-2xl p-4 shadow-lg"
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
+                      <Ionicons name="wallet-outline" size={28} color="#ffffff" />
+                    </View>
+                    <Text className="text-white font-bold text-base">
+                      Budget
+                    </Text>
+                    <Text className="text-purple-100 text-xs mt-1">
+                      By budget
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+
+              {/* Credit Card Packages */}
+              <View className="w-1/2 px-2 mb-3">
+                <TouchableOpacity
+                  onPress={() => router.push("/credit-packages" as any)}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={["#f97316", "#ea580c"]}
+                    className="rounded-2xl p-4 shadow-lg"
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
+                      <Ionicons name="card-outline" size={28} color="#ffffff" />
+                    </View>
+                    <Text className="text-white font-bold text-base">
+                      Card Offers
+                    </Text>
+                    <Text className="text-orange-100 text-xs mt-1">
+                      Credit cards
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+
+              {/* AI Trend Search */}
+              <View className="w-1/2 px-2 mb-3">
+                <TouchableOpacity
+                  onPress={() => router.push("/ai-packages" as any)}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={["#ec4899", "#db2777"]}
+                    className="rounded-2xl p-4 shadow-lg"
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
+                      <Ionicons name="sparkles" size={28} color="#ffffff" />
+                    </View>
+                    <Text className="text-white font-bold text-base">
+                      AI Trends
+                    </Text>
+                    <Text className="text-pink-100 text-xs mt-1">
+                      Smart search
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+
+              {/* View Journeys */}
+              <View className="w-1/2 px-2 mb-3">
+                <TouchableOpacity
+                  onPress={() => router.push("/journeys")}
+                  activeOpacity={0.8}
+                >
+                  <LinearGradient
+                    colors={["#22c55e", "#16a34a"]}
+                    className="rounded-2xl p-4 shadow-lg"
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
+                      <Ionicons name="list" size={28} color="#ffffff" />
+                    </View>
+                    <Text className="text-white font-bold text-base">
+                      Journeys
+                    </Text>
+                    <Text className="text-green-100 text-xs mt-1">
+                      View all
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
 
@@ -127,9 +297,9 @@ export default function AgentDashboard() {
             </View>
 
             <View className="flex-row gap-3">
-              <StatCard label="Active" value="4" icon="time-outline" color="blue" />
-              <StatCard label="Escalated" value="1" icon="warning-outline" color="red" />
-              <StatCard label="Done" value="12" icon="checkmark-circle-outline" color="green" />
+              <StatCard label="Active" value={stats.active.toString()} icon="time-outline" color="blue" />
+              <StatCard label="Escalated" value={stats.escalated.toString()} icon="warning-outline" color="red" />
+              <StatCard label="Done" value={stats.completed.toString()} icon="checkmark-circle-outline" color="green" />
             </View>
           </View>
 
@@ -139,31 +309,28 @@ export default function AgentDashboard() {
               <Text className="text-base font-bold text-gray-800">
                 Recent Activity
               </Text>
-              <TouchableOpacity onPress={() => router.push("/(agent)/journeys")}>
+              <TouchableOpacity onPress={() => router.push("/journeys")}>
                 <Text className="text-sm text-blue-600 font-semibold">See All</Text>
               </TouchableOpacity>
             </View>
 
-            <JourneyRow
-              title="Mumbai → Dubai"
-              subtitle="Emirates Flight EK 501"
-              status="Confirmed"
-              time="2 hours ago"
-              success
-            />
-            <JourneyRow
-              title="Delhi → Paris"
-              subtitle="Air France AF 226"
-              status="Escalated"
-              time="4 hours ago"
-            />
-            <JourneyRow
-              title="Bangalore → Singapore"
-              subtitle="Singapore Airlines SQ 508"
-              status="In Progress"
-              time="6 hours ago"
-              inProgress
-            />
+            {recentJourneys.length > 0 ? (
+              recentJourneys.map((journey) => (
+                <JourneyRow
+                  key={journey.id}
+                  title={journey.customer_name}
+                  subtitle={`Journey #${journey.id.slice(0, 8)}`}
+                  status={journey.status}
+                  time={getTimeAgo(journey.created_at)}
+                  success={journey.status === 'CONFIRMED'}
+                  inProgress={journey.status === 'PENDING' || journey.status === 'DRAFT'}
+                />
+              ))
+            ) : (
+              <View className="bg-white rounded-2xl p-6 border border-gray-200">
+                <Text className="text-gray-500 text-center">No recent journeys</Text>
+              </View>
+            )}
           </View>
         </Animated.View>
       </ScrollView>

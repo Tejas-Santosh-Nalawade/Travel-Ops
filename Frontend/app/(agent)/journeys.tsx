@@ -80,7 +80,7 @@ export default function Journeys() {
     <SafeAreaView className="flex-1 bg-gray-50">
       {/* Header */}
       <View className="bg-white px-4 py-4 border-b border-gray-200">
-        <View className="flex-row items-center justify-between">
+        <View className="flex-row items-center justify-between mb-3">
           <View className="flex-1">
             <Text className="text-2xl font-bold text-gray-800">My Journeys</Text>
             <Text className="text-sm text-gray-500 mt-1">{journeys.length} total journeys</Text>
@@ -93,6 +93,16 @@ export default function Journeys() {
             <Text className="text-white font-bold">New</Text>
           </TouchableOpacity>
         </View>
+
+        {/* Find Packages Button */}
+        <TouchableOpacity
+          onPress={() => router.push("/(agent)/package-options" as any)}
+          className="bg-gradient-to-r from-purple-600 to-pink-600 rounded-xl py-3 flex-row items-center justify-center"
+          activeOpacity={0.8}
+        >
+          <Ionicons name="sparkles" size={20} color="#ffffff" />
+          <Text className="text-white font-bold ml-2">Find Packages</Text>
+        </TouchableOpacity>
       </View>
 
       {journeys.length === 0 ? (

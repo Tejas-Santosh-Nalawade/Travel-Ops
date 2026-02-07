@@ -74,6 +74,39 @@ export default function AgentLayout() {
           },
         }}
       />
+
+      {/* Hidden screens - accessible via navigation but not in tab bar */}
+      <Tabs.Screen
+        name="budget-packages"
+        options={{
+          href: null, // Hide from tab bar
+          title: "Budget Packages",
+        }}
+      />
+
+      <Tabs.Screen
+        name="credit-packages"
+        options={{
+          href: null, // Hide from tab bar
+          title: "Credit Card Offers",
+        }}
+      />
+
+      <Tabs.Screen
+        name="ai-packages"
+        options={{
+          href: null, // Hide from tab bar
+          title: "AI Trend Search",
+        }}
+      />
+
+      <Tabs.Screen
+        name="package-options"
+        options={{
+          href: null, // Hide from tab bar
+          title: "Package Options",
+        }}
+      />
     </Tabs>
   );
 }

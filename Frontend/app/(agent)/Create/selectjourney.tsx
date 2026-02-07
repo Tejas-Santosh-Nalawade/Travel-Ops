@@ -99,8 +99,8 @@ export default function SelectJourney() {
   };
 
   const handleContinue = () => {
-    // Navigate to next step or confirmation
-    router.push("/(agent)/Create/journey");
+    // Navigate to payment options
+    router.push("/(agent)/Create/payment");
   };
 
   return (

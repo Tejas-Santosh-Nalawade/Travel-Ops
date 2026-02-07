@@ -1,274 +1,344 @@
-import React, { useEffect, useState } from 'react'
-import { Text, View, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Alert } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Ionicons, MaterialIcons } from '@expo/vector-icons'
-import { LinearGradient } from 'expo-linear-gradient'
-import { useRouter } from 'expo-router'
-import { supabase } from '../../lib/supabase'
+import React from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { SafeAreaView } from "react-native-safe-area-context";
 
-interface Stats {
-  totalUsers: number
-  totalJourneys: number
-  totalIncidents: number
-  criticalAlerts: number
-}
+export default function RuleEngine() {
+  const activeRules = [
+    { id: '1', name: 'Auto-Retry Failure', status: 'Active', icon: 'refresh', executions: '1.2k', lastRun: '2m ago' },
+    { id: '2', name: 'Price Spike Threshold', status: 'Active', icon: 'trending-up', executions: '847', lastRun: '5m ago' },
+    { id: '3', name: 'SLA Escalation Trigger', status: 'Paused', icon: 'alarm', executions: '523', lastRun: '1h ago' },
+  ];
 
-interface Notification {
-  id: string
-  message: string
-  status: string
-  created_at: string
-}
-
-export default function AdminDashboard() {
-  const router = useRouter()
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-  const [stats, setStats] = useState<Stats>({
-    totalUsers: 0,
-    totalJourneys: 0,
-    totalIncidents: 0,
-    criticalAlerts: 0
-  })
-  const [notifications, setNotifications] = useState<Notification[]>([])
-  const [user, setUser] = useState<any>(null)
-
-  useEffect(() => {
-    checkAuth()
-    loadDashboard()
-  }, [])
-
-  const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      router.replace('/(auth)/onboarding')
-      return
-    }
-    setUser(user)
-  }
-
-  const loadDashboard = async () => {
-    try {
-      // Load stats
-      const [journeysRes, incidentsRes, alertsRes, notificationsRes] = await Promise.all([
-        supabase.from('journeys').select('id', { count: 'exact' }),
-        supabase.from('incidents').select('id', { count: 'exact' }).eq('status', 'OPEN'),
-        supabase.from('ops_alerts').select('id', { count: 'exact' }).eq('status', 'OPEN'),
-        supabase.from('admin_notifications').select('*').order('created_at', { ascending: false }).limit(10)
-      ])
-
-      setStats({
-        totalUsers: 0,
-        totalJourneys: journeysRes.count || 0,
-        totalIncidents: incidentsRes.count || 0,
-        criticalAlerts: alertsRes.count || 0
-      })
-
-      setNotifications(notificationsRes.data || [])
-    } catch (error: any) {
-      console.error('Error loading dashboard:', error.message)
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
-    }
-  }
-
-  const onRefresh = () => {
-    setRefreshing(true)
-    loadDashboard()
-  }
-
-  const handleLogout = async () => {
-    Alert.alert(
-      'Sign Out',
-      'Are you sure you want to sign out?',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Sign Out',
-          style: 'destructive',
-          onPress: async () => {
-            const { error } = await supabase.auth.signOut()
-            if (error) {
-              Alert.alert('Error', error.message)
-            } else {
-              router.replace('/(auth)/onboarding')
-            }
-          }
-        }
-      ]
-    )
-  }
-
-  if (loading) {
-    return (
-      <SafeAreaView className="flex-1 bg-gray-50 items-center justify-center">
-        <ActivityIndicator size="large" color="#8b5cf6" />
-      </SafeAreaView>
-    )
-  }
+  const getStatusStyle = (status: string) => ({
+    backgroundColor: status === 'Active' ? '#dcfce7' : '#fef3c7',
+    color: status === 'Active' ? '#166534' : '#92400e',
+    dotColor: status === 'Active' ? '#22c55e' : '#f59e0b',
+  });
 
   return (
-    <SafeAreaView className="flex-1 bg-gray-50">
-      {/* Header */}
-      <View className="bg-white px-4 py-4 border-b border-gray-200">
-        <View className="flex-row items-center justify-between">
-          <View className="flex-1">
-            <Text className="text-2xl font-bold text-gray-800">Admin Dashboard</Text>
-            <Text className="text-sm text-gray-500 mt-1">System Overview & Management</Text>
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header with Stats */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.title}>Rule Engine</Text>
+            <Text style={styles.subtitle}>
+              Automate decisions & system behavior
+            </Text>
           </View>
-          <TouchableOpacity
-            onPress={handleLogout}
-            className="bg-purple-50 rounded-xl px-4 py-2 flex-row items-center gap-2"
-            activeOpacity={0.7}
-          >
-            <Ionicons name="log-out-outline" size={20} color="#8b5cf6" />
-            <Text className="text-purple-600 font-semibold">Logout</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      <ScrollView
-        className="flex-1"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      >
-        {/* Stats Grid */}
-        <View className="p-4">
-          <View className="flex-row flex-wrap -mx-2">
-            {/* Total Journeys */}
-            <View className="w-1/2 px-2 mb-4">
-              <View className="bg-white rounded-xl p-4 shadow-sm">
-                <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center mb-3">
-                  <Ionicons name="airplane" size={24} color="#3b82f6" />
-                </View>
-                <Text className="text-2xl font-bold text-gray-800">{stats.totalJourneys}</Text>
-                <Text className="text-sm text-gray-500 mt-1">Total Journeys</Text>
-              </View>
+          
+          <View style={styles.statsRow}>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>12</Text>
+              <Text style={styles.statLabel}>Active</Text>
             </View>
-
-            {/* Open Incidents */}
-            <View className="w-1/2 px-2 mb-4">
-              <View className="bg-white rounded-xl p-4 shadow-sm">
-                <View className="w-12 h-12 rounded-full bg-red-100 items-center justify-center mb-3">
-                  <Ionicons name="warning" size={24} color="#ef4444" />
-                </View>
-                <Text className="text-2xl font-bold text-gray-800">{stats.totalIncidents}</Text>
-                <Text className="text-sm text-gray-500 mt-1">Open Incidents</Text>
-              </View>
-            </View>
-
-            {/* Critical Alerts */}
-            <View className="w-1/2 px-2 mb-4">
-              <View className="bg-white rounded-xl p-4 shadow-sm">
-                <View className="w-12 h-12 rounded-full bg-orange-100 items-center justify-center mb-3">
-                  <Ionicons name="alert-circle" size={24} color="#f97316" />
-                </View>
-                <Text className="text-2xl font-bold text-gray-800">{stats.criticalAlerts}</Text>
-                <Text className="text-sm text-gray-500 mt-1">Active Alerts</Text>
-              </View>
-            </View>
-
-            {/* System Status */}
-            <View className="w-1/2 px-2 mb-4">
-              <View className="bg-white rounded-xl p-4 shadow-sm">
-                <View className="w-12 h-12 rounded-full bg-green-100 items-center justify-center mb-3">
-                  <Ionicons name="checkmark-circle" size={24} color="#22c55e" />
-                </View>
-                <Text className="text-2xl font-bold text-gray-800">Online</Text>
-                <Text className="text-sm text-gray-500 mt-1">System Status</Text>
-              </View>
+            <View style={styles.statBox}>
+              <Text style={styles.statNumber}>3</Text>
+              <Text style={styles.statLabel}>Paused</Text>
             </View>
           </View>
         </View>
 
-        {/* Recent Notifications */}
-        <View className="px-4 pb-4">
-          <View className="bg-white rounded-xl p-4 shadow-sm">
-            <View className="flex-row items-center justify-between mb-4">
-              <Text className="text-lg font-bold text-gray-800">Recent Notifications</Text>
-              <Ionicons name="notifications-outline" size={20} color="#6b7280" />
-            </View>
+        {/* Rule Cards */}
+        {activeRules.map((rule, index) => {
+          const statusStyle = getStatusStyle(rule.status);
 
-            {notifications.length === 0 ? (
-              <View className="items-center py-8">
-                <Ionicons name="notifications-off-outline" size={48} color="#d1d5db" />
-                <Text className="text-gray-500 text-sm mt-3">No notifications</Text>
-              </View>
-            ) : (
-              <View className="space-y-3">
-                {notifications.slice(0, 5).map((notification) => (
-                  <View
-                    key={notification.id}
-                    className={`p-3 rounded-lg border ${
-                      notification.status === 'SENT'
-                        ? 'bg-blue-50 border-blue-200'
-                        : 'bg-gray-50 border-gray-200'
-                    }`}
-                  >
-                    <Text className="text-sm text-gray-800 mb-1">{notification.message}</Text>
-                    <Text className="text-xs text-gray-500">
-                      {new Date(notification.created_at).toLocaleString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit'
-                      })}
-                    </Text>
+          return (
+            <TouchableOpacity 
+              key={rule.id} 
+              activeOpacity={0.7}
+              style={[
+                styles.card,
+                { transform: [{ scale: 1 }] }
+              ]}
+            >
+              <LinearGradient
+                colors={['#ffffff', '#fafafa']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.cardGradient}
+              >
+                {/* Top Row */}
+                <View style={styles.cardTop}>
+                  <View style={styles.left}>
+                    <View style={[styles.iconWrap, { 
+                      backgroundColor: index % 3 === 0 ? '#dbeafe' : index % 3 === 1 ? '#fce7f3' : '#e0e7ff'
+                    }]}>
+                      <MaterialIcons 
+                        name={rule.icon as any} 
+                        size={22} 
+                        color={index % 3 === 0 ? '#2563eb' : index % 3 === 1 ? '#db2777' : '#7c3aed'} 
+                      />
+                    </View>
+
+                    <View style={styles.ruleInfo}>
+                      <Text style={styles.ruleName}>{rule.name}</Text>
+                      <View style={styles.metaRow}>
+                        <View style={[styles.statusPill, { backgroundColor: statusStyle.backgroundColor }]}>
+                          <View style={[styles.statusDot, { backgroundColor: statusStyle.dotColor }]} />
+                          <Text style={[styles.statusText, { color: statusStyle.color }]}>
+                            {rule.status}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
                   </View>
-                ))}
-              </View>
-            )}
-          </View>
-        </View>
 
-        {/* Quick Actions */}
-        <View className="px-4 pb-6">
-          <Text className="text-lg font-bold text-gray-800 mb-3">Quick Actions</Text>
-          <View className="space-y-3">
-            <TouchableOpacity
-              className="bg-white rounded-xl p-4 flex-row items-center shadow-sm"
-              activeOpacity={0.7}
-            >
-              <View className="w-12 h-12 rounded-full bg-purple-100 items-center justify-center">
-                <Ionicons name="people-outline" size={24} color="#8b5cf6" />
-              </View>
-              <View className="ml-4 flex-1">
-                <Text className="text-base font-semibold text-gray-800">Manage Users</Text>
-                <Text className="text-xs text-gray-500 mt-1">View and manage user accounts</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-            </TouchableOpacity>
+                  <TouchableOpacity style={styles.settingsBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                    <Ionicons name="ellipsis-horizontal" size={20} color="#64748b" />
+                  </TouchableOpacity>
+                </View>
 
-            <TouchableOpacity
-              className="bg-white rounded-xl p-4 flex-row items-center shadow-sm"
-              activeOpacity={0.7}
-            >
-              <View className="w-12 h-12 rounded-full bg-blue-100 items-center justify-center">
-                <Ionicons name="settings-outline" size={24} color="#3b82f6" />
-              </View>
-              <View className="ml-4 flex-1">
-                <Text className="text-base font-semibold text-gray-800">System Settings</Text>
-                <Text className="text-xs text-gray-500 mt-1">Configure system preferences</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
-            </TouchableOpacity>
+                {/* Divider */}
+                <View style={styles.divider} />
 
-            <TouchableOpacity
-              className="bg-white rounded-xl p-4 flex-row items-center shadow-sm"
-              activeOpacity={0.7}
-            >
-              <View className="w-12 h-12 rounded-full bg-green-100 items-center justify-center">
-                <Ionicons name="analytics-outline" size={24} color="#22c55e" />
-              </View>
-              <View className="ml-4 flex-1">
-                <Text className="text-base font-semibold text-gray-800">View Reports</Text>
-                <Text className="text-xs text-gray-500 mt-1">Access system reports and analytics</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#9ca3af" />
+                {/* Bottom Stats Row */}
+                <View style={styles.cardBottom}>
+                  <View style={styles.miniStat}>
+                    <Ionicons name="pulse-outline" size={14} color="#64748b" />
+                    <Text style={styles.miniStatText}>{rule.executions} runs</Text>
+                  </View>
+                  <View style={styles.miniStat}>
+                    <Ionicons name="time-outline" size={14} color="#64748b" />
+                    <Text style={styles.miniStatText}>{rule.lastRun}</Text>
+                  </View>
+                </View>
+              </LinearGradient>
             </TouchableOpacity>
-          </View>
-        </View>
+          );
+        })}
+
+        {/* CTA Button */}
+        <TouchableOpacity activeOpacity={0.85} style={styles.addButtonWrapper}>
+          <LinearGradient
+            colors={['#3b82f6', '#2563eb', '#1d4ed8']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.addButton}
+          >
+            <View style={styles.addButtonContent}>
+              <View style={styles.addIconCircle}>
+                <Ionicons name="add" size={20} color="#3b82f6" />
+              </View>
+              <Text style={styles.addButtonText}>Create New Rule</Text>
+            </View>
+          </LinearGradient>
+        </TouchableOpacity>
+
+        {/* Bottom Spacing */}
+        <View style={{ height: 40 }} />
       </ScrollView>
     </SafeAreaView>
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#f8fafc',
+  },
+
+  header: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 24,
+  },
+
+  title: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#0f172a',
+    letterSpacing: -0.5,
+  },
+
+  subtitle: {
+    marginTop: 6,
+    fontSize: 15,
+    color: '#64748b',
+    fontWeight: '500',
+  },
+
+  statsRow: {
+    flexDirection: 'row',
+    marginTop: 20,
+    gap: 12,
+  },
+
+  statBox: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+  },
+
+  statNumber: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: '#3b82f6',
+  },
+
+  statLabel: {
+    fontSize: 12,
+    color: '#64748b',
+    marginTop: 4,
+    fontWeight: '600',
+  },
+
+  card: {
+    marginHorizontal: 20,
+    marginBottom: 16,
+    borderRadius: 20,
+    overflow: 'hidden',
+
+    // iOS shadow
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+
+    // Android shadow
+    elevation: 3,
+  },
+
+  cardGradient: {
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    borderRadius: 20,
+  },
+
+  cardTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+
+  left: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    flex: 1,
+  },
+
+  iconWrap: {
+    width: 48,
+    height: 48,
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 14,
+  },
+
+  ruleInfo: {
+    flex: 1,
+  },
+
+  ruleName: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 8,
+    letterSpacing: -0.3,
+  },
+
+  metaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 999,
+    gap: 6,
+  },
+
+  statusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+  },
+
+  statusText: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+
+  settingsBtn: {
+    padding: 8,
+    borderRadius: 10,
+    backgroundColor: '#f1f5f9',
+  },
+
+  divider: {
+    height: 1,
+    backgroundColor: '#e2e8f0',
+    marginVertical: 14,
+  },
+
+  cardBottom: {
+    flexDirection: 'row',
+    gap: 20,
+  },
+
+  miniStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+
+  miniStatText: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '600',
+  },
+
+  addButtonWrapper: {
+    marginHorizontal: 20,
+    marginTop: 8,
+  },
+
+  addButton: {
+    borderRadius: 16,
+    overflow: 'hidden',
+    
+    // Enhanced shadow
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 8,
+  },
+
+  addButtonContent: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    gap: 12,
+  },
+
+  addIconCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#ffffff',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  addButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+});
