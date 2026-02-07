@@ -46,9 +46,6 @@ export default function AgentLayout() {
         options={{
           title: "Create",
           tabBarIcon: ({ color }) => (
-<<<<<<< HEAD
-            <Ionicons name="add-circle" size={36} color="#2563eb" />
-=======
             <Ionicons name="add-circle" size={30} color={color} />
           ),
         }}
@@ -70,7 +67,6 @@ export default function AgentLayout() {
           title: "Profile",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="person-outline" size={size} color={color} />
->>>>>>> 5d4be93f63d8c626f810221aa30b82b978ee7a0d
           ),
           tabBarLabelStyle: {
             fontSize: 12,
