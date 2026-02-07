@@ -12,10 +12,10 @@ import {
   Alert,
   Animated,
 } from 'react-native';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../../lib/supabase';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { 
+import {
   GradientHeader,
   StatCard,
   StatusBadge,
@@ -25,7 +25,7 @@ import {
   EmptyState,
   MoneyDisplay,
   RiskIndicator,
-} from '../../component/UIKit';
+} from '../../../component/UIKit';
 import {
   getOperationsStatistics,
   getCriticalJourneys,
@@ -37,7 +37,7 @@ import {
   getIncidents,
   getDecisions,
   getMoneyExposure,
-} from '../../lib/operationsApi';
+} from '../../../lib/operationsApi';
 
 type Journey = {
   id: string;
@@ -125,7 +125,7 @@ export default function Dashboard() {
   const loadDashboardData = useCallback(async () => {
     try {
       setLoading(true);
-      
+
       // Use optimized backend functions
       const [statsData, alertsData, incidentsData, exposureData, decisionsData] = await Promise.all([
         getOperationsStatistics(),
@@ -134,7 +134,7 @@ export default function Dashboard() {
         getMoneyExposure(),
         getDecisions(10),
       ]);
-      
+
       // Update state
       setStats({
         totalJourneys: statsData.total_journeys || 0,
@@ -143,16 +143,16 @@ export default function Dashboard() {
         totalExposure: statsData.total_exposure || 0,
         highRiskJourneys: statsData.high_risk_count || 0,
       });
-      
+
       setAlerts(alertsData);
       setIncidents(incidentsData);
       setMoneyExposure(exposureData);
       setDecisions(decisionsData);
-      
+
       // Load critical journeys for the journeys tab
       const criticalData = await getCriticalJourneys();
       setJourneys(criticalData || []);
-      
+
     } catch (error) {
       console.error('Error loading dashboard data:', error);
       Alert.alert('Error', 'Failed to load dashboard data. Please try again.');
@@ -187,7 +187,7 @@ export default function Dashboard() {
 
     try {
       const { data: userData } = await supabase.auth.getUser();
-      
+
       if (!userData?.user?.id) {
         Alert.alert('Error', 'User not authenticated');
         return;
@@ -233,8 +233,8 @@ export default function Dashboard() {
 
   const renderOverview = () => (
     <View className="flex-1">
-      <GradientHeader 
-        title="Operations Control Center" 
+      <GradientHeader
+        title="Operations Control Center"
         subtitle={`Last updated: ${new Date().toLocaleTimeString()}`}
       />
 
@@ -242,7 +242,7 @@ export default function Dashboard() {
         {/* Key Metrics - Improved Layout */}
         <View className="flex-row flex-wrap -mx-2 mb-6">
           <View className="w-1/2 px-2 mb-4">
-            <StatCard 
+            <StatCard
               title="Total Journeys"
               value={stats.totalJourneys}
               icon="airplane"
@@ -252,7 +252,7 @@ export default function Dashboard() {
             />
           </View>
           <View className="w-1/2 px-2 mb-4">
-            <StatCard 
+            <StatCard
               title="Active Alerts"
               value={stats.activeAlerts}
               icon="alert-circle"
@@ -262,7 +262,7 @@ export default function Dashboard() {
             />
           </View>
           <View className="w-1/2 px-2 mb-4">
-            <StatCard 
+            <StatCard
               title="Open Incidents"
               value={stats.openIncidents}
               icon="warning"
@@ -272,7 +272,7 @@ export default function Dashboard() {
             />
           </View>
           <View className="w-1/2 px-2 mb-4">
-            <StatCard 
+            <StatCard
               title="Total Exposure"
               value={`₹${(stats.totalExposure / 1000).toFixed(1)}k`}
               icon="cash"
@@ -286,7 +286,7 @@ export default function Dashboard() {
         {/* High Risk Alert - Enhanced */}
         {stats.highRiskJourneys > 0 && (
           <View className="mb-6">
-            <AlertCard 
+            <AlertCard
               type="error"
               title="⚠️ High Risk Alert"
               message={`${stats.highRiskJourneys} journey${stats.highRiskJourneys > 1 ? 's' : ''} require immediate attention. Review financial exposure now.`}
@@ -300,12 +300,12 @@ export default function Dashboard() {
 
         {/* Recent Alerts - Improved Design */}
         <View className="mb-6">
-          <SectionHeader 
-            title="🚨 Recent Alerts" 
+          <SectionHeader
+            title="🚨 Recent Alerts"
             subtitle={alerts.length > 0 ? `${alerts.length} active` : 'All clear'}
-            action={alerts.length > 3 ? { label: 'View All', onPress: () => {} } : undefined}
+            action={alerts.length > 3 ? { label: 'View All', onPress: () => { } } : undefined}
           />
-          
+
           {alerts.length > 0 ? (
             alerts.slice(0, 3).map((alertItem: OpsAlert, index: number) => (
               <Card key={alertItem.id || `alert-${index}`}>
@@ -346,7 +346,7 @@ export default function Dashboard() {
               </Card>
             ))
           ) : (
-            <EmptyState 
+            <EmptyState
               icon="checkmark-done-circle"
               title="All Clear!"
               subtitle="No active alerts at the moment. Great job team!"
@@ -356,12 +356,12 @@ export default function Dashboard() {
 
         {/* Recent Incidents - Enhanced */}
         <View className="mb-6">
-          <SectionHeader 
-            title="⚡ Active Incidents" 
+          <SectionHeader
+            title="⚡ Active Incidents"
             subtitle={incidents.length > 0 ? `${incidents.length} requiring action` : 'No incidents'}
             action={incidents.length > 0 ? { label: 'Manage All', onPress: () => router.push('/(ops)/incidents') } : undefined}
           />
-          
+
           {incidents.length > 0 ? (
             incidents.map((incident, index) => (
               <Card key={incident.id || `incident-${index}`}>
@@ -399,14 +399,14 @@ export default function Dashboard() {
               </Card>
             ))
           ) : (
-            <EmptyState 
+            <EmptyState
               icon="shield-checkmark"
               title="No Incidents"
               subtitle="System is running smoothly"
             />
           )}
         </View>
-        
+
         <View className="h-6" />
       </View>
     </View>
@@ -414,14 +414,14 @@ export default function Dashboard() {
 
   const renderJourneys = () => (
     <View className="flex-1">
-      <GradientHeader 
-        title="Journey Management" 
+      <GradientHeader
+        title="Journey Management"
         subtitle="Monitor all travel bookings"
       />
 
       <View className="px-4 pt-4">
-        <SectionHeader 
-          title="All Journeys" 
+        <SectionHeader
+          title="All Journeys"
           subtitle={`${journeys.length} total`}
         />
 
@@ -484,13 +484,13 @@ export default function Dashboard() {
             </TouchableOpacity>
           ))
         ) : (
-          <EmptyState 
+          <EmptyState
             icon="airplane-outline"
             title="No Journeys"
             subtitle="No journeys to display"
           />
         )}
-        
+
         <View className="h-6" />
       </View>
     </View>
@@ -504,8 +504,8 @@ export default function Dashboard() {
 
     return (
       <View className="flex-1">
-        <GradientHeader 
-          title="💰 Money Exposure Tracking" 
+        <GradientHeader
+          title="💰 Money Exposure Tracking"
           subtitle="Real-time financial risk monitoring"
         />
 
@@ -564,8 +564,8 @@ export default function Dashboard() {
             </View>
           )}
 
-          <SectionHeader 
-            title="Active Exposures" 
+          <SectionHeader
+            title="Active Exposures"
             subtitle={`${moneyExposure.length} journeys tracked`}
           />
 
@@ -585,7 +585,7 @@ export default function Dashboard() {
                       </View>
                       <RiskIndicator level={exposure.risk_level as 'LOW' | 'MEDIUM' | 'HIGH'} />
                     </View>
-                    
+
                     <View className="bg-gray-50 rounded-lg p-3 mb-3">
                       <View className="flex-row justify-between items-center">
                         <View className="flex-1">
@@ -616,13 +616,13 @@ export default function Dashboard() {
               );
             })
           ) : (
-            <EmptyState 
+            <EmptyState
               icon="cash-outline"
               title="No Active Exposures"
               subtitle="All financial exposures have been cleared"
             />
           )}
-          
+
           <View className="h-6" />
         </View>
       </View>
@@ -631,14 +631,14 @@ export default function Dashboard() {
 
   const renderDecisions = () => (
     <View className="flex-1">
-      <GradientHeader 
-        title="Decision History" 
+      <GradientHeader
+        title="Decision History"
         subtitle="Operations decisions log"
       />
 
       <View className="px-4 pt-4">
-        <SectionHeader 
-          title="Recent Decisions" 
+        <SectionHeader
+          title="Recent Decisions"
           subtitle={`${decisions.length} recorded`}
         />
 
@@ -671,13 +671,13 @@ export default function Dashboard() {
             </Card>
           ))
         ) : (
-          <EmptyState 
+          <EmptyState
             icon="document-text-outline"
             title="No Decisions Yet"
             subtitle="No operational decisions recorded"
           />
         )}
-        
+
         <View className="h-6" />
       </View>
     </View>
@@ -724,9 +724,8 @@ export default function Dashboard() {
             ].map((tab) => (
               <TouchableOpacity
                 key={tab.key}
-                className={`px-4 py-2 mx-1 rounded-lg flex-row items-center ${
-                  activeTab === tab.key ? 'bg-blue-500' : 'bg-gray-100'
-                }`}
+                className={`px-4 py-2 mx-1 rounded-lg flex-row items-center ${activeTab === tab.key ? 'bg-blue-500' : 'bg-gray-100'
+                  }`}
                 onPress={() => setActiveTab(tab.key)}
               >
                 <Ionicons
@@ -735,9 +734,8 @@ export default function Dashboard() {
                   color={activeTab === tab.key ? '#FFFFFF' : '#6B7280'}
                 />
                 <Text
-                  className={`ml-2 font-semibold ${
-                    activeTab === tab.key ? 'text-white' : 'text-gray-700'
-                  }`}
+                  className={`ml-2 font-semibold ${activeTab === tab.key ? 'text-white' : 'text-gray-700'
+                    }`}
                 >
                   {tab.label}
                 </Text>
@@ -773,15 +771,13 @@ export default function Dashboard() {
               {['RETRY', 'REPLACE', 'ROLLBACK', 'HOLD'].map((type) => (
                 <TouchableOpacity
                   key={type}
-                  className={`px-4 py-2 rounded-lg mr-2 mb-2 ${
-                    decisionType === type ? 'bg-blue-500' : 'bg-gray-200'
-                  }`}
+                  className={`px-4 py-2 rounded-lg mr-2 mb-2 ${decisionType === type ? 'bg-blue-500' : 'bg-gray-200'
+                    }`}
                   onPress={() => setDecisionType(type)}
                 >
                   <Text
-                    className={`font-semibold ${
-                      decisionType === type ? 'text-white' : 'text-gray-700'
-                    }`}
+                    className={`font-semibold ${decisionType === type ? 'text-white' : 'text-gray-700'
+                      }`}
                   >
                     {type}
                   </Text>

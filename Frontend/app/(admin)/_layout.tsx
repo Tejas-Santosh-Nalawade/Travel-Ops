@@ -22,7 +22,7 @@ export default function AdminLayout() {
       }}
     >
       <Tabs.Screen
-        name="dashboard"
+        name="Home"
         options={{
           title: "Home",
           tabBarIcon: ({ color, size }) => (
@@ -51,7 +51,7 @@ export default function AdminLayout() {
         }}
       />
 
-</Tabs>
- 
+    </Tabs>
+
   );
 }

@@ -3,7 +3,7 @@ import { Text, View, ScrollView, TouchableOpacity, ActivityIndicator, RefreshCon
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
-import { supabase } from '../../lib/supabase'
+import { supabase } from '../../../lib/supabase'
 
 interface Journey {
   id: string
@@ -127,6 +127,7 @@ export default function Journeys() {
                 key={journey.id || `journey-${index}`}
                 className="bg-white rounded-xl p-4 shadow-sm border border-gray-100"
                 activeOpacity={0.7}
+                onPress={() => router.push(`/(agent)/Journey/${journey.id}` as any)}
               >
                 <View className="flex-row items-start justify-between mb-3">
                   <View className="flex-1">

@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
-import { supabase } from '../../lib/supabase'
+import { supabase } from '../../../lib/supabase'
 
 interface Package {
   id: string
@@ -37,7 +37,7 @@ export default function PackageSearch() {
   useEffect(() => {
     // Auto-search on mount to show initial results
     searchPackages()
-    
+
     Animated.timing(fadeAnim, {
       toValue: 1,
       duration: 500,
@@ -157,7 +157,7 @@ export default function PackageSearch() {
         </TouchableOpacity>
       </LinearGradient>
 
-      <Animated.ScrollView 
+      <Animated.ScrollView
         className="flex-1"
         style={{ opacity: fadeAnim }}
         showsVerticalScrollIndicator={false}
@@ -181,7 +181,7 @@ export default function PackageSearch() {
                     placeholder="₹ 0"
                     keyboardType="numeric"
                     value={filters.minPrice}
-                    onChangeText={(text) => setFilters({...filters, minPrice: text})}
+                    onChangeText={(text) => setFilters({ ...filters, minPrice: text })}
                     className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-200 text-gray-900 font-semibold"
                   />
                 </View>
@@ -191,7 +191,7 @@ export default function PackageSearch() {
                     placeholder="₹ ∞"
                     keyboardType="numeric"
                     value={filters.maxPrice}
-                    onChangeText={(text) => setFilters({...filters, maxPrice: text})}
+                    onChangeText={(text) => setFilters({ ...filters, maxPrice: text })}
                     className="bg-gray-50 rounded-xl px-4 py-3 border border-gray-200 text-gray-900 font-semibold"
                   />
                 </View>
@@ -216,21 +216,19 @@ export default function PackageSearch() {
                   ].map((type) => (
                     <TouchableOpacity
                       key={type.id}
-                      onPress={() => setFilters({...filters, packageType: type.id})}
-                      className={`px-5 py-3 rounded-xl flex-row items-center ${
-                        filters.packageType === type.id 
-                          ? 'bg-gradient-to-r from-purple-600 to-pink-600' 
+                      onPress={() => setFilters({ ...filters, packageType: type.id })}
+                      className={`px-5 py-3 rounded-xl flex-row items-center ${filters.packageType === type.id
+                          ? 'bg-gradient-to-r from-purple-600 to-pink-600'
                           : 'bg-gray-100'
-                      }`}
+                        }`}
                     >
-                      <Ionicons 
-                        name={type.icon as any} 
-                        size={16} 
-                        color={filters.packageType === type.id ? '#fff' : '#6b7280'} 
+                      <Ionicons
+                        name={type.icon as any}
+                        size={16}
+                        color={filters.packageType === type.id ? '#fff' : '#6b7280'}
                       />
-                      <Text className={`ml-2 font-bold capitalize ${
-                        filters.packageType === type.id ? 'text-white' : 'text-gray-700'
-                      }`}>
+                      <Text className={`ml-2 font-bold capitalize ${filters.packageType === type.id ? 'text-white' : 'text-gray-700'
+                        }`}>
                         {type.label}
                       </Text>
                     </TouchableOpacity>
@@ -332,13 +330,13 @@ export default function PackageSearch() {
                     </Text>
                   </View>
                 )}
-                
+
                 <View className="flex-row items-center">
                   <View className="bg-white/20 backdrop-blur-md rounded-full p-2 mr-2">
-                    <MaterialCommunityIcons 
-                      name={getPackageTypeIcon(pkg.package_type) as any} 
-                      size={20} 
-                      color="#fff" 
+                    <MaterialCommunityIcons
+                      name={getPackageTypeIcon(pkg.package_type) as any}
+                      size={20}
+                      color="#fff"
                     />
                   </View>
                   <Text className="text-white font-bold capitalize">
@@ -361,7 +359,7 @@ export default function PackageSearch() {
                       </Text>
                     </View>
                   </View>
-                  
+
                   {/* Price Badge */}
                   <View className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl px-4 py-2">
                     <Text className="text-xs text-purple-600 font-bold">

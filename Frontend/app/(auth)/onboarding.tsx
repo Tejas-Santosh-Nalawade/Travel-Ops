@@ -76,11 +76,10 @@ export default function OnboardingRole() {
           {roles.map((role) => (
             <TouchableOpacity
               key={role.id}
-              className={`relative flex flex-col gap-4 p-6 rounded-xl shadow-sm active:scale-95 ${
-                selectedRole === role.id
-                  ? "border-2 border-primary bg-white dark:bg-[#1a2e2c]"
-                  : "border-2 border-transparent bg-white dark:bg-[#1a2e2c]"
-              }`}
+              className={`relative flex flex-col gap-4 p-6 rounded-xl shadow-sm active:scale-95 ${selectedRole === role.id
+                ? "border-2 border-primary bg-white dark:bg-[#1a2e2c]"
+                : "border-2 border-transparent bg-white dark:bg-[#1a2e2c]"
+                }`}
               onPress={() => setSelectedRole(role.id)}
               activeOpacity={0.8}
             >
@@ -97,11 +96,10 @@ export default function OnboardingRole() {
                   </Text>
                 </View>
                 <View
-                  className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${
-                    selectedRole === role.id
-                      ? "border-primary bg-primary"
-                      : "border-gray-300 dark:border-gray-600"
-                  }`}
+                  className={`h-6 w-6 rounded-full border-2 flex items-center justify-center ${selectedRole === role.id
+                    ? "border-primary bg-primary"
+                    : "border-gray-300 dark:border-gray-600"
+                    }`}
                 >
                   {selectedRole === role.id && (
                     <Ionicons name="checkmark" size={16} color="white" />
@@ -126,16 +124,15 @@ export default function OnboardingRole() {
         {/* Get Started Button */}
         <View className="px-4 pb-6">
           <TouchableOpacity
-          disabled={!selectedRole}
+            disabled={!selectedRole}
             className="w-full bg-primary py-4 px-5 rounded-full shadow-lg active:scale-95"
             onPress={() => {
-                if (!selectedRole) return;
-              
-                router.push({
-                  pathname: '/(auth)/sign-up',
-                  params: { role: selectedRole },
-                });
-              }}
+              if (!selectedRole) return;
+
+              router.push({
+                pathname: `/${selectedRole}/Home` as any,
+              });
+            }}
             activeOpacity={0.9}
           >
             <Text className="text-[#0d1b1a] text-lg font-extrabold text-center">

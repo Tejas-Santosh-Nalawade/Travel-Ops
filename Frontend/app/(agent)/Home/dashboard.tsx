@@ -11,11 +11,11 @@ import {
   Animated,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { supabase } from "../../lib/supabase";
+import { supabase } from "../../../lib/supabase";
 
 export default function AgentDashboard() {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const user = "agent";
   const [loading, setLoading] = useState(true);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [stats, setStats] = useState({
@@ -25,24 +25,6 @@ export default function AgentDashboard() {
   });
   const [recentJourneys, setRecentJourneys] = useState<any[]>([]);
 
-  // ✅ Session check
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      if (!data.session) {
-        router.replace("/(auth)/onboarding");
-      } else {
-        setUser(data.session.user);
-        loadDashboardData(data.session.user.id);
-        // Fade in animation
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 600,
-          useNativeDriver: true,
-        }).start();
-      }
-      setLoading(false);
-    });
-  }, []);
 
   // Load dashboard data
   const loadDashboardData = async (userId: string) => {
@@ -81,14 +63,22 @@ export default function AgentDashboard() {
     }
   };
 
+  useEffect(() => {
+    // Simply initialize the UI without auth
+    // Fade in animation
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 600,
+      useNativeDriver: true,
+    }).start();
+
+    // Set loading to false to show the dashboard
+    setLoading(false);
+  }, []);
+
   // ✅ Logout
-  const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      Alert.alert(error.message);
-    } else {
-      router.replace("/(auth)/onboarding");
-    }
+  const handleLogout = () => {
+    router.replace("/(auth)/onboarding");
   };
 
   // Helper function to calculate time ago
@@ -105,8 +95,9 @@ export default function AgentDashboard() {
     return `${diffInDays} day${diffInDays > 1 ? 's' : ''} ago`;
   };
 
+  // Don't render until data is loaded
   if (loading) return null;
-  if (!user) return <Redirect href="/(auth)/onboarding" />;
+
 
   return (
     <SafeAreaView className="flex-1 bg-gray-50">
@@ -121,7 +112,7 @@ export default function AgentDashboard() {
             <View className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 items-center justify-center shadow-lg">
               <View className="w-11 h-11 rounded-full bg-blue-600 items-center justify-center">
                 <Text className="font-bold text-white text-lg">
-                  {user.user_metadata?.full_name?.[0] ?? "A"}
+                  A
                 </Text>
               </View>
             </View>
@@ -134,7 +125,7 @@ export default function AgentDashboard() {
               Dashboard
             </Text>
             <Text className="text-xs text-gray-500 mt-0.5">
-              Welcome back, {user.user_metadata?.full_name?.split(' ')[0] ?? 'Agent'}
+              Welcome back, Agent
             </Text>
           </View>
 
@@ -188,7 +179,7 @@ export default function AgentDashboard() {
               {/* Budget Packages */}
               <View className="w-1/2 px-2 mb-3">
                 <TouchableOpacity
-                  onPress={() => router.push("/budget-packages" as any)}
+                  onPress={() => router.push("/(agent)/Home/budget-packages")}
                   activeOpacity={0.8}
                 >
                   <LinearGradient
@@ -213,7 +204,7 @@ export default function AgentDashboard() {
               {/* Credit Card Packages */}
               <View className="w-1/2 px-2 mb-3">
                 <TouchableOpacity
-                  onPress={() => router.push("/credit-packages" as any)}
+                  onPress={() => router.push("/(agent)/Home/credit-packages")}
                   activeOpacity={0.8}
                 >
                   <LinearGradient
@@ -238,7 +229,7 @@ export default function AgentDashboard() {
               {/* AI Trend Search */}
               <View className="w-1/2 px-2 mb-3">
                 <TouchableOpacity
-                  onPress={() => router.push("/ai-packages" as any)}
+                  onPress={() => router.push("/(agent)/Home/ai-packages")}
                   activeOpacity={0.8}
                 >
                   <LinearGradient
@@ -263,7 +254,7 @@ export default function AgentDashboard() {
               {/* View Journeys */}
               <View className="w-1/2 px-2 mb-3">
                 <TouchableOpacity
-                  onPress={() => router.push("/journeys")}
+                  onPress={() => router.push("/(agent)/Journey/journeys")}
                   activeOpacity={0.8}
                 >
                   <LinearGradient
@@ -309,7 +300,7 @@ export default function AgentDashboard() {
               <Text className="text-base font-bold text-gray-800">
                 Recent Activity
               </Text>
-              <TouchableOpacity onPress={() => router.push("/journeys")}>
+              <TouchableOpacity onPress={() => router.push("/Journey/journeys")}>
                 <Text className="text-sm text-blue-600 font-semibold">See All</Text>
               </TouchableOpacity>
             </View>
@@ -449,15 +440,15 @@ function JourneyRow({
   const statusColor = success
     ? "text-green-600 bg-green-50"
     : inProgress
-    ? "text-amber-600 bg-amber-50"
-    : "text-red-600 bg-red-50";
+      ? "text-amber-600 bg-amber-50"
+      : "text-red-600 bg-red-50";
 
   const iconColor = success ? "#16a34a" : inProgress ? "#d97706" : "#dc2626";
   const iconName = success
     ? "checkmark-circle"
     : inProgress
-    ? "time"
-    : "alert-circle";
+      ? "time"
+      : "alert-circle";
 
   return (
     <TouchableOpacity

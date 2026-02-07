@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
-import { supabase } from '../../lib/supabase'
+import { supabase } from '../../../lib/supabase'
 
 interface Package {
   package_id: string
@@ -140,16 +140,14 @@ export default function CreditCardPackages() {
                     <TouchableOpacity
                       key={type}
                       onPress={() => setCardType(type)}
-                      className={`px-4 py-2 rounded-full border ${
-                        cardType === type
+                      className={`px-4 py-2 rounded-full border ${cardType === type
                           ? 'bg-amber-600 border-amber-600'
                           : 'bg-white border-gray-300'
-                      }`}
+                        }`}
                     >
                       <Text
-                        className={`text-sm font-semibold ${
-                          cardType === type ? 'text-white' : 'text-gray-600'
-                        }`}
+                        className={`text-sm font-semibold ${cardType === type ? 'text-white' : 'text-gray-600'
+                          }`}
                       >
                         {type.toUpperCase()}
                       </Text>
@@ -170,16 +168,14 @@ export default function CreditCardPackages() {
                     <TouchableOpacity
                       key={tier}
                       onPress={() => setCardTier(tier)}
-                      className={`px-4 py-2 rounded-full border ${
-                        cardTier === tier
+                      className={`px-4 py-2 rounded-full border ${cardTier === tier
                           ? 'bg-amber-600 border-amber-600'
                           : 'bg-white border-gray-300'
-                      }`}
+                        }`}
                     >
                       <Text
-                        className={`text-sm font-semibold capitalize ${
-                          cardTier === tier ? 'text-white' : 'text-gray-600'
-                        }`}
+                        className={`text-sm font-semibold capitalize ${cardTier === tier ? 'text-white' : 'text-gray-600'
+                          }`}
                       >
                         {tier}
                       </Text>

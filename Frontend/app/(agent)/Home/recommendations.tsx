@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons'
 import { useRouter } from 'expo-router'
 import { LinearGradient } from 'expo-linear-gradient'
-import { supabase } from '../../lib/supabase'
+import { supabase } from '../../../lib/supabase'
 
 type RecommendationType = 'budget' | 'trend' | 'credit'
 
@@ -72,9 +72,9 @@ export default function Recommendations() {
     try {
       setLoading(true)
       setRecommendations([])
-      
+
       const { data: userData } = await supabase.auth.getUser()
-      
+
       // Get or create customer
       let { data: customer } = await supabase
         .from('customers')
@@ -100,7 +100,7 @@ export default function Recommendations() {
 
       if (error) throw error
       setRecommendations(data || [])
-      
+
       if (data?.length === 0) {
         Alert.alert('No Results', 'No packages found in your budget range. Try adjusting your filters.')
       }
@@ -121,9 +121,9 @@ export default function Recommendations() {
     try {
       setLoading(true)
       setRecommendations([])
-      
+
       const { data: userData } = await supabase.auth.getUser()
-      
+
       let { data: customer } = await supabase
         .from('customers')
         .select('id')
@@ -154,7 +154,7 @@ export default function Recommendations() {
 
       if (error) throw error
       setRecommendations(data || [])
-      
+
       if (data?.length === 0) {
         Alert.alert('No Results', 'No trending packages found. Try a different URL.')
       }
@@ -175,9 +175,9 @@ export default function Recommendations() {
     try {
       setLoading(true)
       setRecommendations([])
-      
+
       const { data: userData } = await supabase.auth.getUser()
-      
+
       let { data: customer } = await supabase
         .from('customers')
         .select('id')
@@ -202,7 +202,7 @@ export default function Recommendations() {
 
       if (error) throw error
       setRecommendations(data || [])
-      
+
       if (data?.length === 0) {
         Alert.alert('No Results', 'No offers found for your card. Try increasing your spending limit.')
       }
@@ -217,8 +217,8 @@ export default function Recommendations() {
   const formatPrice = (price: number) => `₹${price.toLocaleString('en-IN')}`
 
   const renderChoiceCards = () => (
-    <Animated.View 
-      style={{ 
+    <Animated.View
+      style={{
         opacity: fadeAnim,
         transform: [{ translateY: slideAnim }]
       }}
@@ -253,7 +253,7 @@ export default function Recommendations() {
               <Ionicons name="chevron-forward" size={24} color="#fff" />
             </View>
           </View>
-          
+
           <View className="flex-row items-center bg-white/10 rounded-xl p-3">
             <Ionicons name="checkmark-circle" size={20} color="#93c5fd" />
             <Text className="text-blue-50 ml-2 text-sm">
@@ -292,7 +292,7 @@ export default function Recommendations() {
               <Ionicons name="chevron-forward" size={24} color="#fff" />
             </View>
           </View>
-          
+
           <View className="flex-row gap-2">
             <View className="flex-1 bg-white/10  rounded-xl p-2 flex-row items-center justify-center">
               <Ionicons name="logo-instagram" size={16} color="#fbbf24" />
@@ -335,7 +335,7 @@ export default function Recommendations() {
               <Ionicons name="chevron-forward" size={24} color="#fff" />
             </View>
           </View>
-          
+
           <View className="flex-row items-center bg-white/10 rounded-xl p-3">
             <MaterialCommunityIcons name="sale" size={20} color="#86efac" />
             <Text className="text-green-50 ml-2 text-sm">
@@ -397,15 +397,13 @@ export default function Recommendations() {
             <TouchableOpacity
               key={num}
               onPress={() => setNumTravelers(num === '5+' ? '5' : num)}
-              className={`flex-1 py-3 rounded-xl ${
-                numTravelers === (num === '5+' ? '5' : num)
+              className={`flex-1 py-3 rounded-xl ${numTravelers === (num === '5+' ? '5' : num)
                   ? 'bg-blue-600'
                   : 'bg-white border-2 border-blue-200'
-              }`}
+                }`}
             >
-              <Text className={`text-center font-extrabold ${
-                numTravelers === (num === '5+' ? '5' : num) ? 'text-white' : 'text-blue-600'
-              }`}>
+              <Text className={`text-center font-extrabold ${numTravelers === (num === '5+' ? '5' : num) ? 'text-white' : 'text-blue-600'
+                }`}>
                 {num}
               </Text>
             </TouchableOpacity>
@@ -456,9 +454,8 @@ export default function Recommendations() {
         <View className="flex-row gap-3">
           <TouchableOpacity
             onPress={() => setTrendType('instagram')}
-            className={`flex-1 py-4 rounded-xl flex-row items-center justify-center ${
-              trendType === 'instagram' ? 'bg-gradient-to-r from-pink-600 to-purple-600' : 'bg-white border-2 border-orange-200'
-            }`}
+            className={`flex-1 py-4 rounded-xl flex-row items-center justify-center ${trendType === 'instagram' ? 'bg-gradient-to-r from-pink-600 to-purple-600' : 'bg-white border-2 border-orange-200'
+              }`}
           >
             <Ionicons name="logo-instagram" size={20} color={trendType === 'instagram' ? 'white' : '#f97316'} />
             <Text className={`ml-2 font-extrabold ${trendType === 'instagram' ? 'text-white' : 'text-orange-600'}`}>
@@ -467,9 +464,8 @@ export default function Recommendations() {
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setTrendType('youtube')}
-            className={`flex-1 py-4 rounded-xl flex-row items-center justify-center ${
-              trendType === 'youtube' ? 'bg-red-600' : 'bg-white border-2 border-orange-200'
-            }`}
+            className={`flex-1 py-4 rounded-xl flex-row items-center justify-center ${trendType === 'youtube' ? 'bg-red-600' : 'bg-white border-2 border-orange-200'
+              }`}
           >
             <Ionicons name="logo-youtube" size={20} color={trendType === 'youtube' ? 'white' : '#f97316'} />
             <Text className={`ml-2 font-extrabold ${trendType === 'youtube' ? 'text-white' : 'text-orange-600'}`}>
@@ -545,13 +541,11 @@ export default function Recommendations() {
               <TouchableOpacity
                 key={card.id}
                 onPress={() => setCardType(card.id)}
-                className={`px-5 py-3 rounded-xl ${
-                  cardType === card.id ? 'bg-green-600' : 'bg-white border-2 border-green-200'
-                }`}
+                className={`px-5 py-3 rounded-xl ${cardType === card.id ? 'bg-green-600' : 'bg-white border-2 border-green-200'
+                  }`}
               >
-                <Text className={`font-extrabold capitalize ${
-                  cardType === card.id ? 'text-white' : 'text-green-700'
-                }`}>
+                <Text className={`font-extrabold capitalize ${cardType === card.id ? 'text-white' : 'text-green-700'
+                  }`}>
                   {card.id}
                 </Text>
               </TouchableOpacity>
@@ -572,13 +566,11 @@ export default function Recommendations() {
             <TouchableOpacity
               key={tier.id}
               onPress={() => setCardTier(tier.id)}
-              className={`flex-1 py-3 rounded-xl ${
-                cardTier === tier.id ? 'bg-green-600' : 'bg-white border-2 border-green-200'
-              }`}
+              className={`flex-1 py-3 rounded-xl ${cardTier === tier.id ? 'bg-green-600' : 'bg-white border-2 border-green-200'
+                }`}
             >
-              <Text className={`text-center font-extrabold capitalize text-xs ${
-                cardTier === tier.id ? 'text-white' : 'text-green-700'
-              }`}>
+              <Text className={`text-center font-extrabold capitalize text-xs ${cardTier === tier.id ? 'text-white' : 'text-green-700'
+                }`}>
                 {tier.id}
               </Text>
             </TouchableOpacity>
@@ -631,8 +623,8 @@ export default function Recommendations() {
         className="px-6 py-5"
       >
         <View className="flex-row items-center">
-          <TouchableOpacity 
-            onPress={() => activeType ? setActiveType(null) : router.back()} 
+          <TouchableOpacity
+            onPress={() => activeType ? setActiveType(null) : router.back()}
             className="mr-4 bg-white/20 rounded-full p-2"
           >
             <Ionicons name="arrow-back" size={24} color="#fff" />
@@ -651,8 +643,8 @@ export default function Recommendations() {
         </View>
       </LinearGradient>
 
-      <ScrollView 
-        className="flex-1 px-4 pt-6" 
+      <ScrollView
+        className="flex-1 px-4 pt-6"
         showsVerticalScrollIndicator={false}
       >
         {!activeType && renderChoiceCards()}
@@ -679,8 +671,8 @@ export default function Recommendations() {
                 <LinearGradient
                   colors={
                     activeType === 'budget' ? ['#3b82f6', '#2563eb'] :
-                    activeType === 'trend' ? ['#f97316', '#fb923c'] :
-                    ['#10b981', '#059669']
+                      activeType === 'trend' ? ['#f97316', '#fb923c'] :
+                        ['#10b981', '#059669']
                   }
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
@@ -698,7 +690,7 @@ export default function Recommendations() {
                         </Text>
                       </View>
                     </View>
-                    
+
                     {activeType === 'budget' && rec.match_score && (
                       <View className="bg-white/20 rounded-2xl px-4 py-2">
                         <Text className="text-white text-xs font-bold">MATCH</Text>
@@ -723,26 +715,24 @@ export default function Recommendations() {
                 {/* Content */}
                 <View className="p-5">
                   {/* Recommendation Reason */}
-                  <View className={`${
-                    activeType === 'budget' ? 'bg-blue-50' :
-                    activeType === 'trend' ? 'bg-orange-50' :
-                    'bg-green-50'
-                  } p-4 rounded-2xl mb-4`}>
+                  <View className={`${activeType === 'budget' ? 'bg-blue-50' :
+                      activeType === 'trend' ? 'bg-orange-50' :
+                        'bg-green-50'
+                    } p-4 rounded-2xl mb-4`}>
                     <View className="flex-row items-start">
-                      <Ionicons 
-                        name="information-circle" 
-                        size={20} 
+                      <Ionicons
+                        name="information-circle"
+                        size={20}
                         color={
                           activeType === 'budget' ? '#3b82f6' :
-                          activeType === 'trend' ? '#f97316' :
-                          '#10b981'
+                            activeType === 'trend' ? '#f97316' :
+                              '#10b981'
                         }
                       />
-                      <Text className={`flex-1 ml-2 font-semibold ${
-                        activeType === 'budget' ? 'text-blue-900' :
-                        activeType === 'trend' ? 'text-orange-900' :
-                        'text-green-900'
-                      }`}>
+                      <Text className={`flex-1 ml-2 font-semibold ${activeType === 'budget' ? 'text-blue-900' :
+                          activeType === 'trend' ? 'text-orange-900' :
+                            'text-green-900'
+                        }`}>
                         {rec.recommendation_reason}
                       </Text>
                     </View>
@@ -795,23 +785,22 @@ export default function Recommendations() {
                       ) : (
                         <>
                           <Text className="text-sm text-gray-500">Starting from</Text>
-                          <Text className={`text-3xl font-extrabold ${
-                            activeType === 'budget' ? 'text-blue-600' :
-                            activeType === 'trend' ? 'text-orange-600' :
-                            'text-green-600'
-                          }`}>
+                          <Text className={`text-3xl font-extrabold ${activeType === 'budget' ? 'text-blue-600' :
+                              activeType === 'trend' ? 'text-orange-600' :
+                                'text-green-600'
+                            }`}>
                             {formatPrice(rec.price_per_person || rec.total_cost || 0)}
                           </Text>
                         </>
                       )}
                     </View>
-                    
+
                     <TouchableOpacity>
                       <LinearGradient
                         colors={
                           activeType === 'budget' ? ['#3b82f6', '#2563eb'] :
-                          activeType === 'trend' ? ['#f97316', '#fb923c'] :
-                          ['#10b981', '#059669']
+                            activeType === 'trend' ? ['#f97316', '#fb923c'] :
+                              ['#10b981', '#059669']
                         }
                         className="rounded-2xl px-6 py-3 flex-row items-center shadow-lg"
                       >
