@@ -134,26 +134,60 @@ export default function BuildJourney() {
     // Here we would save to Supabase
     // Using the same logic as before but adapted
     try {
-      const { data: { user } } = await supabase.auth.getUser();
+      // 1. Get User ID (Handle "Agent Smith" or Auth)
+      let creatorId = "00000000-0000-0000-0000-000000000000";
 
-      // Dummy insert for now as per schema
-      const { error } = await supabase
+      try {
+        // FK Fix: Trigger on 'journeys' references 'customers' table.
+        // We must ensure creatorId exists in 'customers'.
+
+        // Priority 1: Check 'customers' table directly
+        const { data: validCustomer } = await supabase
+          .from('customers')
+          .select('id')
+          .limit(1)
+          .maybeSingle();
+
+        if (validCustomer) {
+          creatorId = validCustomer.id;
+        } else {
+          // Priority 2: Check auth user (if they happen to be in customers)
+          const { data: { user } } = await supabase.auth.getUser();
+          if (user) creatorId = user.id;
+        }
+      } catch (err) {
+        console.log("Error resolving customer ID:", err);
+      }
+
+      // 2. Insert Journey into Database
+      const { data, error } = await supabase
         .from('journeys')
         .insert({
           customer_name: clientName,
-          created_by: user?.id || "00000000-0000-0000-0000-000000000000",
+          created_by: creatorId,
           status: 'DRAFT',
           total_cost: totalEstimate
-        });
+        })
+        .select()
+        .single();
 
       if (error) throw error;
+      const journey = data;
 
-      Alert.alert("Success", "Journey validated and created!", [
-        { text: "OK", onPress: () => router.push("/(agent)/Journey/journeys") } // Navigate to list
+      // 3. Navigate to Execution
+      Alert.alert("Success", "Journey created! Proceeding to validation.", [
+        {
+          text: "Execute Journey",
+          onPress: () => router.push({
+            pathname: '/(agent)/Create/execution',
+            params: { journeyId: journey.id }
+          })
+        }
       ]);
 
     } catch (e: any) {
-      Alert.alert("Error", e.message);
+      console.error("Journey creation failed:", e);
+      Alert.alert("Error", e.message || 'Failed to create journey');
     }
   };
 

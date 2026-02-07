@@ -12,11 +12,26 @@ export default function JourneyDetails() {
     const [journey, setJourney] = useState<any>(null);
     const [loading, setLoading] = useState(true);
 
+    const [decision, setDecision] = useState<any>(null);
+
     useEffect(() => {
         if (id) {
             loadJourneyDetails();
+            loadDecision();
         }
     }, [id]);
+
+    const loadDecision = async () => {
+        const { data } = await supabase
+            .from('decisions')
+            .select('*')
+            .eq('journey_id', id)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+
+        if (data) setDecision(data);
+    };
 
     const loadJourneyDetails = async () => {
         try {
@@ -164,6 +179,21 @@ export default function JourneyDetails() {
                         </View>
                     </View>
                 </View>
+
+                {/* Operations Decision Alert */}
+                {decision && (
+                    <View className="bg-orange-50 rounded-2xl p-4 border border-orange-200 mb-6">
+                        <View className="flex-row items-center mb-2">
+                            <Ionicons name="warning-outline" size={24} color="#ea580c" />
+                            <Text className="text-orange-900 font-bold ml-2 text-lg">Operations Decision</Text>
+                        </View>
+                        <Text className="text-orange-800 font-bold text-base mb-1">Action: {decision.decision}</Text>
+                        <Text className="text-orange-700 text-sm italic mb-2">"{decision.notes}"</Text>
+                        <Text className="text-orange-500 text-xs text-right">
+                            {new Date(decision.created_at).toLocaleString()}
+                        </Text>
+                    </View>
+                )}
 
                 {/* Actions */}
                 <Text className="text-lg font-bold text-gray-900 mb-4">Quick Actions</Text>

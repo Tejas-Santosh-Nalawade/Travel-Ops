@@ -24,7 +24,7 @@ export default function AgentLayout() {
       <Tabs.Screen
         name="Home"
         options={{
-          title: "Dashboard",
+          title: "Home",
           tabBarIcon: ({ color, size }) => (
             <Ionicons name="grid-outline" size={size} color={color} />
           ),

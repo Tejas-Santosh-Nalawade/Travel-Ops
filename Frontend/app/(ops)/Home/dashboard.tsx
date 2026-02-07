@@ -467,19 +467,17 @@ export default function Dashboard() {
                   <Ionicons name="eye" size={16} color="#3B82F6" />
                   <Text className="ml-2 text-sm text-blue-500 font-medium">Tap to view details</Text>
                 </View>
-                {(journey.status === 'FAILED' || journey.status === 'ON_HOLD') && (
-                  <View className="mt-3">
-                    <ActionButton
-                      title="Make Decision"
-                      onPress={() => {
-                        setSelectedJourneyId(journey.id);
-                        setDecisionModal(true);
-                      }}
-                      variant="primary"
-                      icon="create"
-                    />
-                  </View>
-                )}
+                <View className="mt-3">
+                  <ActionButton
+                    title="Manage Journey"
+                    onPress={() => router.push({
+                      pathname: '/(ops)/Home/decision',
+                      params: { journeyId: journey.id }
+                    })}
+                    variant="primary"
+                    icon="create"
+                  />
+                </View>
               </Card>
             </TouchableOpacity>
           ))
