@@ -1,7 +1,0 @@
-INFO:     Will watch for changes in these directories: ['D:\\HACKATHON\\HACK_FUSION_HACKATHON\\Melt_Down\\Backend\\credit_cards']
-INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
-INFO:     Started reloader process [33116] using StatReload
-INFO:     Started server process [28772]
-INFO:     Waiting for application startup.
-INFO:     Application startup complete.
-WARNING:  StatReload detected changes in 'test_recommendation.py'. Reloading...
