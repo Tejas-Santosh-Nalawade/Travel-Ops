@@ -24,10 +24,6 @@ export default function AuthLayout() {
 
   if (loading) return null;
 
-  if (session) {
-    // Redirect to agent dashboard by default if session exists
-    return <Redirect href="/(agent)/dashboard" />;
-  }
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
