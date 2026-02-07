@@ -1,7 +1,10 @@
+import { View, Text } from 'react-native'
 import React from 'react'
 
-export default function notifications() {
+export default function Notifications() {
   return (
-    <div>notifications</div>
+    <View>
+      <Text>N</Text>
+    </View>
   )
 }

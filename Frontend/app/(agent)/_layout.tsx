@@ -42,11 +42,11 @@ export default function AgentLayout() {
       />
 
       <Tabs.Screen
-        name="create"
+        name="Create"
         options={{
           title: "New",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="add-circle" size={40} color={color} />
+            <Ionicons name="add-circle" size={30} color={color} />
           ),
         }}
       />
