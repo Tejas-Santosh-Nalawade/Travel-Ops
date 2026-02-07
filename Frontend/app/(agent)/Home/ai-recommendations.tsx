@@ -19,11 +19,13 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { travelOrchestrator } from '../../../services/orchestratorAPI';
 import { creditCardService } from '../../../services/creditCardAPI';
+import { useAuth } from '../../../hooks/useAuth';
 
 type RecommendationType = 'budget' | 'multi_city' | 'quick';
 
 export default function AIRecommendations() {
   const router = useRouter();
+  const { fullName, email } = useAuth();
   const [activeType, setActiveType] = useState<RecommendationType | null>(null);
   const [loading, setLoading] = useState(false);
   const [travelPlan, setTravelPlan] = useState<any>(null);
@@ -70,8 +72,8 @@ export default function AIRecommendations() {
 
       // Create AI-powered plan
       const result = await travelOrchestrator.createEnhancedPlan({
-        customer_name: 'Budget Traveler',
-        customer_email: 'traveler@example.com',
+        customer_name: fullName,
+        customer_email: email,
         customer_phone: '+919876543210',
         total_budget: budget,
         cities: [
@@ -154,8 +156,8 @@ export default function AIRecommendations() {
       const budget = parseFloat(budgetMax || '50000');
 
       const result = await travelOrchestrator.createEnhancedPlan({
-        customer_name: 'Multi-City Traveler',
-        customer_email: 'traveler@example.com',
+        customer_name: fullName,
+        customer_email: email,
         customer_phone: '+919876543210',
         total_budget: budget,
         cities: cityRequests,
@@ -206,8 +208,8 @@ export default function AIRecommendations() {
       setCardRecommendations(null);
 
       const result = await travelOrchestrator.createEnhancedPlan({
-        customer_name: 'Quick Traveler',
-        customer_email: 'traveler@example.com',
+        customer_name: fullName,
+        customer_email: email,
         customer_phone: '+919876543210',
         total_budget: parseFloat(quickBudget),
         cities: [

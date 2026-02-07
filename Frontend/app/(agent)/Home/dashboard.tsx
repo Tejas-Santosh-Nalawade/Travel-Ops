@@ -12,10 +12,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../../lib/supabase";
+import { useAuth } from "../../../hooks/useAuth";
 
 export default function AgentDashboard() {
   const router = useRouter();
-  const user = "agent";
+  const { fullName } = useAuth();
   const [loading, setLoading] = useState(true);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [stats, setStats] = useState({
@@ -112,7 +113,7 @@ export default function AgentDashboard() {
             <View className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 items-center justify-center shadow-lg">
               <View className="w-11 h-11 rounded-full bg-blue-600 items-center justify-center">
                 <Text className="font-bold text-white text-lg">
-                  A
+                  {fullName.charAt(0).toUpperCase()}
                 </Text>
               </View>
             </View>
@@ -125,7 +126,7 @@ export default function AgentDashboard() {
               Dashboard
             </Text>
             <Text className="text-xs text-gray-500 mt-0.5">
-              Welcome back, Agent
+              Welcome back, {fullName}
             </Text>
           </View>
 

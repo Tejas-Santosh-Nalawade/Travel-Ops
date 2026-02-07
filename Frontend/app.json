@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Journeyone",
-    "slug": "Journeyone",
+    "slug": "travel-ops",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -9,7 +9,11 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.pravin121.pixroai",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -49,9 +53,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "8149ebb5-808b-4aeb-a3d4-bd64c01f22fb"
+        "projectId": "bf2d32a7-0eb0-4b6a-8c40-4b6db7eaae22"
       }
     },
-    "owner": "pravin121"
+    "owner": "tejasnalawades-organization"
   }
 }
