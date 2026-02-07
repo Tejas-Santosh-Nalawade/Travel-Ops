@@ -226,10 +226,10 @@ export default function AgentDashboard() {
                 </TouchableOpacity>
               </View>
 
-              {/* AI Trend Search */}
+              {/* AI Orchestrator */}
               <View className="w-1/2 px-2 mb-3">
                 <TouchableOpacity
-                  onPress={() => router.push("/(agent)/Home/ai-packages")}
+                  onPress={() => router.push("/(agent)/Home/ai-recommendations")}
                   activeOpacity={0.8}
                 >
                   <LinearGradient
@@ -242,10 +242,10 @@ export default function AgentDashboard() {
                       <Ionicons name="sparkles" size={28} color="#ffffff" />
                     </View>
                     <Text className="text-white font-bold text-base">
-                      AI Trends
+                      AI Planner
                     </Text>
                     <Text className="text-pink-100 text-xs mt-1">
-                      Smart search
+                      Custom trips
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
