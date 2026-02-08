@@ -12,10 +12,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../../lib/supabase";
+import { useAuth } from "../../../hooks/useAuth";
 
 export default function AgentDashboard() {
   const router = useRouter();
-  const user = "agent";
+  const { fullName } = useAuth();
   const [loading, setLoading] = useState(true);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [stats, setStats] = useState({
@@ -112,7 +113,7 @@ export default function AgentDashboard() {
             <View className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 items-center justify-center shadow-lg">
               <View className="w-11 h-11 rounded-full bg-blue-600 items-center justify-center">
                 <Text className="font-bold text-white text-lg">
-                  A
+                  {fullName.charAt(0).toUpperCase()}
                 </Text>
               </View>
             </View>
@@ -125,7 +126,7 @@ export default function AgentDashboard() {
               Dashboard
             </Text>
             <Text className="text-xs text-gray-500 mt-0.5">
-              Welcome back, Agent
+              Welcome back, {fullName}
             </Text>
           </View>
 
@@ -201,26 +202,26 @@ export default function AgentDashboard() {
                 </TouchableOpacity>
               </View>
 
-              {/* Credit Card Packages */}
+              {/* Credit Card Recommendations - AI Powered */}
               <View className="w-1/2 px-2 mb-3">
                 <TouchableOpacity
-                  onPress={() => router.push("/(agent)/Home/credit-packages")}
+                  onPress={() => router.push("/(agent)/Home/credit-recommendations")}
                   activeOpacity={0.8}
                 >
                   <LinearGradient
-                    colors={["#f97316", "#ea580c"]}
+                    colors={["#10b981", "#059669"]}
                     className="rounded-2xl p-4 shadow-lg"
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
                     <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
-                      <Ionicons name="card-outline" size={28} color="#ffffff" />
+                      <Ionicons name="card" size={28} color="#ffffff" />
                     </View>
                     <Text className="text-white font-bold text-base">
-                      Card Offers
+                      Credit Cards
                     </Text>
-                    <Text className="text-orange-100 text-xs mt-1">
-                      Credit cards
+                    <Text className="text-green-100 text-xs mt-1">
+                      AI rewards
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
