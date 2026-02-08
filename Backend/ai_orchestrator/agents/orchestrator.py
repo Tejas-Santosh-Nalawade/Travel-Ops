@@ -74,6 +74,47 @@ class TravelOrchestratorAgent:
 
         return geodesic(coords1, coords2).kilometers
 
+    async def extract_destinations_from_social_media(
+        self,
+        social_media_url: str,
+        platform: str,
+        total_days: int
+    ) -> List[str]:
+        """
+        Extract travel destinations from social media content using AI.
+
+        Args:
+            social_media_url: URL of Instagram post/reel or YouTube video
+            platform: 'instagram' or 'youtube'
+            total_days: Total trip duration to help allocate days per city
+
+        Returns:
+            List of city names extracted from the content
+        """
+        self._add_simulation_step(
+            action="extract_social_media",
+            description=f"Extracting destinations from {platform} URL",
+            status="in_progress",
+            details={"url": social_media_url, "platform": platform}
+        )
+
+        # Use Groq LLM to analyze the social media content
+        extraction_result = await groq_service.extract_destinations_from_url(
+            url=social_media_url,
+            platform=platform,
+            total_days=total_days
+        )
+
+        destinations = extraction_result.get("destinations", [])
+
+        self.simulation_steps[-1].status = "completed"
+        self.simulation_steps[-1].details.update({
+            "destinations_found": destinations,
+            "extraction_confidence": extraction_result.get("confidence", 0.8)
+        })
+
+        return destinations
+
     async def analyze_travel_request(self, request: TravelRequest) -> Dict[str, Any]:
         """Initial analysis of travel request"""
         self._add_simulation_step(
@@ -378,6 +419,52 @@ class TravelOrchestratorAgent:
         This is the core AI agent logic.
         """
         self.simulation_steps = []  # Reset simulation
+
+        # Handle social media URL extraction if provided
+        if request.social_media_url and request.social_platform:
+            # Extract destinations from social media content
+            total_days = sum(city.duration_days for city in request.cities)
+            destinations = await self.extract_destinations_from_social_media(
+                social_media_url=request.social_media_url,
+                platform=request.social_platform.value,
+                total_days=total_days
+            )
+
+            # If destinations were extracted, replace the cities in the request
+            if destinations and len(destinations) >= 2:
+                from datetime import date, timedelta
+                from models.schemas import CityStop
+
+                # Distribute days among cities
+                days_per_city = max(1, total_days // len(destinations))
+                remaining_days = total_days - (days_per_city * len(destinations))
+
+                new_cities = []
+                current_date = date.today()
+
+                for idx, city_name in enumerate(destinations):
+                    duration = days_per_city + (1 if idx < remaining_days else 0)
+                    arrival_date = current_date
+                    departure_date = current_date + timedelta(days=duration)
+
+                    new_cities.append(CityStop(
+                        city=city_name,
+                        duration_days=duration,
+                        arrival_date=arrival_date,
+                        departure_date=departure_date
+                    ))
+
+                    current_date = departure_date
+
+                # Update the request with extracted cities
+                request.cities = new_cities
+
+                self._add_simulation_step(
+                    action="update_cities_from_social_media",
+                    description=f"Updated itinerary with {len(destinations)} cities from social media",
+                    status="completed",
+                    details={"extracted_cities": destinations}
+                )
 
         # Step 1: Analyze request
         analysis = await self.analyze_travel_request(request)

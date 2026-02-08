@@ -26,6 +26,10 @@ class Settings(BaseSettings):
     ANTHROPIC_API_KEY: Optional[str] = None
     GROQ_API_KEY: Optional[str] = "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"
 
+    # Social Media APIs
+    YOUTUBE_API_KEY: Optional[str] = None  # Get from https://console.cloud.google.com/
+    ENABLE_CONTENT_FETCHING: bool = True  # Enable dynamic content fetching from social media
+
     # Groq Settings - Choose your model based on needs
     USE_GROQ_LLM: bool = True  # Enable Groq as main LLM
 

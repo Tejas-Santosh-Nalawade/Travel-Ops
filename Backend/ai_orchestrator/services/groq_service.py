@@ -323,6 +323,188 @@ Response:"""
                 "highlights": ["Smart route planning", "Budget optimized", "Excellent accommodations"]
             }
 
+    async def extract_destinations_from_url(
+        self,
+        url: str,
+        platform: str,
+        total_days: int
+    ) -> Dict[str, Any]:
+        """
+        Extract travel destinations from social media content using AI.
+
+        Args:
+            url: Instagram or YouTube URL
+            platform: 'instagram' or 'youtube'
+            total_days: Total trip duration to suggest proper number of cities
+
+        Returns:
+            Dict with destinations list and confidence score
+        """
+        # Import here to avoid circular dependency
+        from services.social_media_fetcher import social_media_fetcher
+
+        if not self.enabled:
+            # Fallback destinations if LLM is disabled
+            return {
+                "destinations": ["Mumbai", "Goa"],
+                "confidence": 0.5,
+                "reasoning": "LLM disabled - using default destinations"
+            }
+
+        # Fetch actual content from social media
+        print(f"Fetching content from {platform}: {url}")
+        content_data = social_media_fetcher.fetch_content(url, platform)
+
+        # Build context from actual content
+        content_context = self._build_content_context(content_data, url, platform)
+
+        prompt = f"""You are a travel content analyzer AI. Analyze this {platform} travel content and extract the destinations mentioned.
+
+{content_context}
+
+Expected trip duration: {total_days} days
+
+IMPORTANT GUIDELINES:
+1. Extract 2-5 major Indian cities that travelers would realistically visit
+2. Suggest destinations that make sense geographically (connected routes)
+3. If the content mentions specific locations, prioritize those
+4. Popular combinations: Mumbai-Goa, Delhi-Jaipur-Agra, Bangalore-Mysore-Coorg, Chennai-Pondicherry
+
+Respond in JSON format ONLY:
+{{
+    "destinations": ["City1", "City2", "City3"],
+    "confidence": 0.85,
+    "reasoning": "Brief explanation of why these destinations were selected",
+    "travel_style": "adventure/relaxed/cultural/beach/mountains",
+    "suggested_activities": ["Activity 1", "Activity 2"]
+}}
+
+Response:"""
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert at analyzing travel content and extracting destination information. Always respond with valid JSON only. Focus on realistic, popular Indian travel destinations."
+                    },
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ],
+                temperature=0.5,
+                max_tokens=600
+            )
+
+            result_text = response.choices[0].message.content.strip()
+
+            # Extract JSON
+            if "```json" in result_text:
+                result_text = result_text.split("```json")[1].split("```")[0].strip()
+            elif "```" in result_text:
+                result_text = result_text.split("```")[1].split("```")[0].strip()
+
+            result = json.loads(result_text)
+
+            # Validate we have at least 2 destinations
+            if not result.get("destinations") or len(result["destinations"]) < 2:
+                # Fallback destinations based on content or URL patterns
+                result["destinations"] = self._get_fallback_destinations(content_data, url)
+                result["confidence"] = 0.6
+                result["reasoning"] = "Suggested popular destinations based on content analysis"
+
+            return result
+
+        except Exception as e:
+            print(f"Groq LLM error in destination extraction: {e}")
+            # Intelligent fallback based on content or URL
+            return {
+                "destinations": self._get_fallback_destinations(content_data, url),
+                "confidence": 0.5,
+                "reasoning": "Fallback destinations due to extraction error",
+                "travel_style": "mixed",
+                "suggested_activities": ["Sightseeing", "Local cuisine", "Photography"]
+            }
+
+    def _build_content_context(self, content_data: Dict[str, Any], url: str, platform: str) -> str:
+        """
+        Build context string from fetched content data.
+        """
+        context_parts = []
+
+        if content_data.get('success'):
+            # Real content was fetched
+            if platform == 'youtube':
+                context_parts.append(f"VIDEO TITLE: {content_data.get('title', 'N/A')}")
+                context_parts.append(f"CHANNEL: {content_data.get('channel_name', 'N/A')}")
+
+                description = content_data.get('description', '')
+                if description:
+                    # Limit description to first 500 chars for context
+                    context_parts.append(f"DESCRIPTION: {description[:500]}...")
+
+                tags = content_data.get('tags', [])
+                if tags:
+                    context_parts.append(f"TAGS: {', '.join(tags[:15])}")
+
+                if content_data.get('limited'):
+                    context_parts.append("NOTE: Limited metadata available (using oEmbed)")
+
+            elif platform == 'instagram':
+                context_parts.append(f"POST TITLE: {content_data.get('title', 'N/A')}")
+                context_parts.append(f"AUTHOR: {content_data.get('author_name', 'N/A')}")
+
+                location_hints = content_data.get('location_hints', [])
+                if location_hints:
+                    context_parts.append(f"LOCATION HINTS: {', '.join(location_hints)}")
+
+        else:
+            # Fallback data
+            context_parts.append(f"URL: {url}")
+            context_parts.append(f"Platform: {platform}")
+
+            keywords = content_data.get('keywords', [])
+            if keywords:
+                context_parts.append(f"URL Keywords: {', '.join(keywords)}")
+            else:
+                context_parts.append("NOTE: Could not fetch content - analyzing URL structure")
+
+        return "\n".join(context_parts)
+
+    def _get_fallback_destinations(self, content_data: Dict[str, Any], url: str) -> List[str]:
+        """
+        Get fallback destinations based on content or URL analysis.
+        """
+        url_lower = url.lower()
+        title = content_data.get('title', '').lower()
+        description = content_data.get('description', '').lower()
+        tags = [tag.lower() for tag in content_data.get('tags', [])]
+        keywords = content_data.get('keywords', [])
+
+        # Combine all text for analysis
+        all_text = ' '.join([url_lower, title, description] + tags)
+
+        # Check for specific regions/destinations
+        if 'goa' in all_text or 'beach' in all_text:
+            return ["Mumbai", "Goa", "Mangalore"]
+        elif 'rajasthan' in all_text or 'desert' in all_text or 'jaipur' in all_text:
+            return ["Delhi", "Jaipur", "Jodhpur"]
+        elif 'kerala' in all_text or 'backwater' in all_text:
+            return ["Kochi", "Munnar", "Alleppey"]
+        elif 'himalaya' in all_text or 'mountain' in all_text or 'ladakh' in all_text:
+            return ["Delhi", "Manali", "Leh"]
+        elif 'south' in all_text or 'bangalore' in all_text or 'mysore' in all_text:
+            return ["Bangalore", "Mysore", "Coorg"]
+        elif 'mumbai' in all_text:
+            return ["Mumbai", "Pune", "Lonavala"]
+        elif 'delhi' in all_text or 'agra' in all_text:
+            return ["Delhi", "Agra", "Jaipur"]
+        else:
+            # Generic popular route
+            return ["Mumbai", "Pune", "Goa"]
+
     def _fallback_transport_decision(self, distance_km: float, preference: str) -> Dict[str, Any]:
         """Fallback logic if LLM fails."""
         if distance_km > 800:

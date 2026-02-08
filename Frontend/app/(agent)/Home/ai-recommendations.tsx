@@ -21,7 +21,7 @@ import { travelOrchestrator } from '../../../services/orchestratorAPI';
 import { creditCardService } from '../../../services/creditCardAPI';
 import { useAuth } from '../../../hooks/useAuth';
 
-type RecommendationType = 'budget' | 'multi_city' | 'quick';
+type RecommendationType = 'budget' | 'multi_city' | 'quick' | 'social_media';
 
 export default function AIRecommendations() {
   const router = useRouter();
@@ -47,6 +47,11 @@ export default function AIRecommendations() {
   const [fromCity, setFromCity] = useState('Pune');
   const [toCity, setToCity] = useState('Mumbai');
   const [quickBudget, setQuickBudget] = useState('');
+
+  // Social media form
+  const [socialMediaUrl, setSocialMediaUrl] = useState('');
+  const [socialPlatform, setSocialPlatform] = useState<'instagram' | 'youtube'>('instagram');
+  const [socialBudget, setSocialBudget] = useState('');
 
   useEffect(() => {
     Animated.timing(fadeAnim, {
@@ -260,6 +265,76 @@ export default function AIRecommendations() {
     }
   };
 
+  const getSocialMediaPlan = async () => {
+    if (!socialMediaUrl.trim() || !socialBudget) {
+      Alert.alert('Missing Information', 'Please enter a social media URL and budget');
+      return;
+    }
+
+    // Validate URL
+    const urlPattern = /(instagram\.com|youtube\.com|youtu\.be)/i;
+    if (!urlPattern.test(socialMediaUrl)) {
+      Alert.alert('Invalid URL', 'Please enter a valid Instagram or YouTube URL');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setTravelPlan(null);
+      setInsights(null);
+      setCardRecommendations(null);
+
+      // Call AI Orchestrator with social media URL
+      // The AI will extract destinations from the influencer's content
+      const result = await travelOrchestrator.createEnhancedPlan({
+        customer_name: fullName,
+        customer_email: email,
+        customer_phone: '+919876543210',
+        total_budget: parseFloat(socialBudget),
+        cities: [
+          {
+            city: 'AI_EXTRACT_FROM_URL',
+            duration_days: 5,
+            arrival_date: new Date().toISOString().split('T')[0],
+            departure_date: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          },
+        ],
+        preference: 'balanced',
+        number_of_travelers: parseInt(numTravelers) || 2,
+        accommodation_type: 'mid_range',
+        social_media_url: socialMediaUrl, // Pass URL to AI for extraction
+        social_platform: socialPlatform,
+      });
+
+      setTravelPlan(result.travel_plan);
+      setInsights(result.insights);
+
+      // Get credit card recommendations for this trip
+      try {
+        const tripCities = [...new Set(result.travel_plan.itinerary.map((leg: any) => leg.to_city))];
+        const cardRecs = await creditCardService.recommendForTrip(
+          result.travel_plan.budget_breakdown.total_budget,
+          tripCities,
+          result.travel_plan.total_duration_days,
+          result.travel_plan.total_travelers
+        );
+        setCardRecommendations(cardRecs);
+      } catch (cardError) {
+        console.error('Failed to get card recommendations:', cardError);
+      }
+
+      Alert.alert(
+        result.ui_summary?.title || 'Success!',
+        result.ui_summary?.summary || 'Influencer-inspired trip plan ready!'
+      );
+    } catch (error: any) {
+      console.error('Social media plan error:', error);
+      Alert.alert('Error', 'Failed to extract destinations from URL. Please try again or enter a different URL.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatPrice = (price: number) => {
     return `₹${price.toLocaleString('en-IN')}`;
   };
@@ -291,6 +366,7 @@ export default function AIRecommendations() {
                 { id: 'budget' as const, icon: 'cash', label: 'Budget Travel', color: '#10b981' },
                 { id: 'multi_city' as const, icon: 'map', label: 'Multi-City', color: '#6366f1' },
                 { id: 'quick' as const, icon: 'flash', label: 'Quick Trip', color: '#f59e0b' },
+                { id: 'social_media' as const, icon: 'logo-instagram', label: 'Influencer Trip', color: '#e1306c' },
               ].map((type) => (
                 <TouchableOpacity
                   key={type.id}
@@ -617,6 +693,159 @@ export default function AIRecommendations() {
                     <Ionicons name="flash" size={22} color="#fff" />
                     <Text className="text-white font-extrabold text-center ml-2 text-lg">
                       Plan Quick Trip
+                    </Text>
+                  </>
+                )}
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {/* Social Media Form */}
+        {activeType === 'social_media' && (
+          <View className="mx-6 mb-6 bg-white rounded-3xl p-6 shadow-lg border border-pink-100">
+            <View className="flex-row items-center mb-4">
+              <View className="bg-pink-100 rounded-full p-3 mr-3">
+                <Ionicons name="logo-instagram" size={24} color="#e1306c" />
+              </View>
+              <View className="flex-1">
+                <Text className="text-xl font-extrabold text-gray-900">Influencer-Inspired Trip</Text>
+                <Text className="text-gray-600 text-xs mt-1">AI extracts destinations from social media</Text>
+              </View>
+            </View>
+
+            {/* Platform Selector */}
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Choose Platform</Text>
+              <View className="flex-row gap-3">
+                <TouchableOpacity
+                  onPress={() => setSocialPlatform('instagram')}
+                  className="flex-1"
+                >
+                  <LinearGradient
+                    colors={socialPlatform === 'instagram' ? ['#e1306c', '#c13584'] : ['#f3f4f6', '#f3f4f6']}
+                    className="rounded-xl py-3 flex-row items-center justify-center"
+                  >
+                    <Ionicons
+                      name="logo-instagram"
+                      size={20}
+                      color={socialPlatform === 'instagram' ? '#fff' : '#6b7280'}
+                    />
+                    <Text
+                      className={`ml-2 font-bold ${
+                        socialPlatform === 'instagram' ? 'text-white' : 'text-gray-700'
+                      }`}
+                    >
+                      Instagram
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={() => setSocialPlatform('youtube')}
+                  className="flex-1"
+                >
+                  <LinearGradient
+                    colors={socialPlatform === 'youtube' ? ['#ff0000', '#cc0000'] : ['#f3f4f6', '#f3f4f6']}
+                    className="rounded-xl py-3 flex-row items-center justify-center"
+                  >
+                    <Ionicons
+                      name="logo-youtube"
+                      size={20}
+                      color={socialPlatform === 'youtube' ? '#fff' : '#6b7280'}
+                    />
+                    <Text
+                      className={`ml-2 font-bold ${
+                        socialPlatform === 'youtube' ? 'text-white' : 'text-gray-700'
+                      }`}
+                    >
+                      YouTube
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* URL Input */}
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">
+                {socialPlatform === 'instagram' ? 'Instagram Post/Reel URL' : 'YouTube Video URL'}
+              </Text>
+              <TextInput
+                placeholder={
+                  socialPlatform === 'instagram'
+                    ? 'https://instagram.com/p/...'
+                    : 'https://youtube.com/watch?v=...'
+                }
+                value={socialMediaUrl}
+                onChangeText={setSocialMediaUrl}
+                className="bg-gray-50 rounded-xl px-4 py-3 border-2 border-pink-200 text-gray-900 font-semibold"
+                placeholderTextColor="#9ca3af"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Text className="text-xs text-gray-500 mt-2">
+                📍 Paste a travel influencer's post URL - AI will extract destinations!
+              </Text>
+            </View>
+
+            {/* Budget */}
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Your Budget (₹)</Text>
+              <TextInput
+                placeholder="50000"
+                keyboardType="numeric"
+                value={socialBudget}
+                onChangeText={setSocialBudget}
+                className="bg-gray-50 rounded-xl px-4 py-3 border-2 border-pink-200 text-gray-900 font-bold"
+                placeholderTextColor="#9ca3af"
+              />
+            </View>
+
+            {/* Number of Travelers */}
+            <View className="mb-4">
+              <Text className="text-sm font-semibold text-gray-700 mb-2">Number of Travelers</Text>
+              <TextInput
+                placeholder="2"
+                keyboardType="numeric"
+                value={numTravelers}
+                onChangeText={setNumTravelers}
+                className="bg-gray-50 rounded-xl px-4 py-3 border-2 border-pink-200 text-gray-900 font-bold"
+                placeholderTextColor="#9ca3af"
+              />
+            </View>
+
+            {/* Info Box */}
+            <View className="bg-pink-50 rounded-xl p-4 mb-4 border border-pink-200">
+              <View className="flex-row items-start">
+                <Ionicons name="information-circle" size={20} color="#db2777" />
+                <View className="flex-1 ml-2">
+                  <Text className="text-pink-900 font-bold text-sm mb-1">How it works:</Text>
+                  <Text className="text-pink-800 text-xs leading-5">
+                    Our AI analyzes the influencer's content, identifies destinations, activities, and travel style, then creates a personalized itinerary matching your budget.
+                  </Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Submit Button */}
+            <TouchableOpacity
+              onPress={getSocialMediaPlan}
+              disabled={loading}
+            >
+              <LinearGradient
+                colors={['#e1306c', '#c13584']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                className="rounded-2xl py-4 flex-row items-center justify-center shadow-lg"
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" size="small" />
+                ) : (
+                  <>
+                    <Ionicons name="sparkles" size={22} color="#fff" />
+                    <Text className="text-white font-extrabold text-center ml-2 text-lg">
+                      Extract & Plan Trip
                     </Text>
                   </>
                 )}

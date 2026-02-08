@@ -11,6 +11,7 @@ from models.schemas import (
 )
 from agents.orchestrator import TravelOrchestratorAgent
 from services.groq_service import groq_service
+from api.simulation import router as simulation_router
 
 
 # Initialize FastAPI app
@@ -27,6 +28,13 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+# Include simulation router for transaction rollback demonstrations
+app.include_router(
+    simulation_router,
+    prefix="/api/v1/transactions",
+    tags=["Transaction Simulation"]
 )
 
 # In-memory storage for simulations (use Redis in production)

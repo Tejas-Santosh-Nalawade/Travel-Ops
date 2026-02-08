@@ -129,6 +129,8 @@ export interface CreatePlanRequest {
   preference: 'cheapest' | 'fastest' | 'balanced' | 'comfort';
   number_of_travelers: number;
   accommodation_type: 'budget' | 'mid_range' | 'premium' | 'luxury';
+  social_media_url?: string; // Optional: URL for AI to extract destinations from
+  social_platform?: 'instagram' | 'youtube'; // Optional: Social media platform type
 }
 
 // Service class
