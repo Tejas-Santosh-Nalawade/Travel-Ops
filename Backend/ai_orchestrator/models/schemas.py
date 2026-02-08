@@ -25,6 +25,11 @@ class TravelPreference(str, Enum):
     COMFORT = "comfort"
 
 
+class SocialPlatform(str, Enum):
+    INSTAGRAM = "instagram"
+    YOUTUBE = "youtube"
+
+
 class CityStop(BaseModel):
     city: str
     state: Optional[str] = None
@@ -44,6 +49,8 @@ class TravelRequest(BaseModel):
     number_of_travelers: int = Field(default=1, ge=1, le=10)
     accommodation_type: Optional[AccommodationType] = AccommodationType.MID_RANGE
     special_requirements: Optional[str] = None
+    social_media_url: Optional[str] = Field(None, description="Social media URL for AI to extract destinations from")
+    social_platform: Optional[SocialPlatform] = Field(None, description="Social media platform type")
 
 
 class TransportOption(BaseModel):

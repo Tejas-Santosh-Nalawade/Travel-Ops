@@ -3,8 +3,22 @@ import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-nati
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from 'expo-router';
 
 export default function RuleEngine() {
+  const router = useRouter();
+
+  const lifecycleCards = [
+    { id: 'policy', name: 'Policy Management', description: 'Manage cancellation & refund policies', icon: 'document-text', route: '/Home/policy-management', color: ['#a855f7', '#9333ea'] },
+    { id: 'modifications', name: 'Modification Requests', description: 'Approve customer change requests', icon: 'create', route: '/Home/modification-requests', color: ['#3b82f6', '#2563eb'] },
+    { id: 'audit', name: 'Audit Trail Viewer', description: 'View immutable change history', icon: 'shield-checkmark', route: '/Home/audit-trail', color: ['#14b8a6', '#0d9488'] },
+  ];
+
+  const transactionCards = [
+    { id: 'monitor', name: 'Transaction Monitor', description: 'Real-time distributed transaction tracking', icon: 'pulse', route: '/Home/transaction-monitor', color: ['#10b981', '#059669'] },
+    { id: 'dlq', name: 'Dead Letter Queue', description: 'Failed compensations requiring intervention', icon: 'alert-circle', route: '/Home/dead-letter-queue', color: ['#ef4444', '#dc2626'] },
+  ];
+
   const activeRules = [
     { id: '1', name: 'Auto-Retry Failure', status: 'Active', icon: 'refresh', executions: '1.2k', lastRun: '2m ago' },
     { id: '2', name: 'Price Spike Threshold', status: 'Active', icon: 'trending-up', executions: '847', lastRun: '5m ago' },
@@ -23,12 +37,12 @@ export default function RuleEngine() {
         {/* Header with Stats */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.title}>Rule Engine</Text>
+            <Text style={styles.title}>Admin Dashboard</Text>
             <Text style={styles.subtitle}>
-              Automate decisions & system behavior
+              Lifecycle Management & Rule Engine
             </Text>
           </View>
-          
+
           <View style={styles.statsRow}>
             <View style={styles.statBox}>
               <Text style={styles.statNumber}>12</Text>
@@ -39,6 +53,78 @@ export default function RuleEngine() {
               <Text style={styles.statLabel}>Paused</Text>
             </View>
           </View>
+        </View>
+
+        {/* Lifecycle Management Section */}
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Lifecycle Management</Text>
+          <Text style={styles.sectionSubtitle}>Cancellation, modification & audit trail</Text>
+        </View>
+
+        {lifecycleCards.map((card) => (
+          <TouchableOpacity
+            key={card.id}
+            activeOpacity={0.7}
+            onPress={() => router.push(card.route as any)}
+            style={styles.card}
+          >
+            <LinearGradient
+              colors={card.color}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.lifecycleCardGradient}
+            >
+              <View style={styles.lifecycleCardContent}>
+                <View style={styles.lifecycleIconWrap}>
+                  <Ionicons name={card.icon as any} size={28} color="#ffffff" />
+                </View>
+                <View style={styles.lifecycleTextWrap}>
+                  <Text style={styles.lifecycleCardTitle}>{card.name}</Text>
+                  <Text style={styles.lifecycleCardDescription}>{card.description}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        ))}
+
+        {/* Transactional Integrity Section */}
+        <View style={[styles.sectionHeader, { marginTop: 24 }]}>
+          <Text style={styles.sectionTitle}>Transactional Integrity</Text>
+          <Text style={styles.sectionSubtitle}>Rollback engine & compensation tracking</Text>
+        </View>
+
+        {transactionCards.map((card) => (
+          <TouchableOpacity
+            key={card.id}
+            activeOpacity={0.7}
+            onPress={() => router.push(card.route as any)}
+            style={styles.card}
+          >
+            <LinearGradient
+              colors={card.color}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.lifecycleCardGradient}
+            >
+              <View style={styles.lifecycleCardContent}>
+                <View style={styles.lifecycleIconWrap}>
+                  <Ionicons name={card.icon as any} size={28} color="#ffffff" />
+                </View>
+                <View style={styles.lifecycleTextWrap}>
+                  <Text style={styles.lifecycleCardTitle}>{card.name}</Text>
+                  <Text style={styles.lifecycleCardDescription}>{card.description}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={24} color="rgba(255,255,255,0.8)" />
+              </View>
+            </LinearGradient>
+          </TouchableOpacity>
+        ))}
+
+        {/* Rule Engine Section */}
+        <View style={[styles.sectionHeader, { marginTop: 24 }]}>
+          <Text style={styles.sectionTitle}>Rule Engine</Text>
+          <Text style={styles.sectionSubtitle}>Automate decisions & behavior</Text>
         </View>
 
         {/* Rule Cards */}
@@ -340,5 +426,68 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.2,
+  },
+
+  // Lifecycle Management Section Styles
+  sectionHeader: {
+    paddingHorizontal: 20,
+    marginBottom: 16,
+  },
+
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0f172a',
+    letterSpacing: -0.5,
+  },
+
+  sectionSubtitle: {
+    fontSize: 13,
+    color: '#64748b',
+    fontWeight: '500',
+    marginTop: 4,
+  },
+
+  lifecycleCardGradient: {
+    borderRadius: 20,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+
+  lifecycleCardContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+
+  lifecycleIconWrap: {
+    width: 56,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 16,
+  },
+
+  lifecycleTextWrap: {
+    flex: 1,
+  },
+
+  lifecycleCardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#ffffff',
+    marginBottom: 4,
+    letterSpacing: -0.3,
+  },
+
+  lifecycleCardDescription: {
+    fontSize: 13,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontWeight: '500',
   },
 });
