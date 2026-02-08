@@ -15,6 +15,18 @@ interface Package {
   savings_percent: number
   match_score: number
   recommendation_reason: string
+  duration_days: number
+  included_items: string[]
+  highlights: string[]
+}
+
+interface BudgetResponse {
+  success: boolean
+  packages: Package[]
+  total_found: number
+  budget_analysis: string
+  ai_insights: string
+  powered_by: string
 }
 
 export default function BudgetPackages() {
@@ -24,6 +36,8 @@ export default function BudgetPackages() {
   const [budgetMin, setBudgetMin] = useState('')
   const [budgetMax, setBudgetMax] = useState('')
   const [numTravelers, setNumTravelers] = useState('2')
+  const [budgetAnalysis, setBudgetAnalysis] = useState('')
+  const [aiInsights, setAiInsights] = useState('')
   const fadeAnim = useState(new Animated.Value(0))[0]
 
   React.useEffect(() => {
@@ -48,50 +62,55 @@ export default function BudgetPackages() {
     try {
       setLoading(true)
       setPackages([])
+      setBudgetAnalysis('')
+      setAiInsights('')
 
-      const { data: userData } = await supabase.auth.getUser()
+      // Use your machine's IP address for React Native
+      const API_BASE_URL = 'http://10.243.165.242:8000'
 
-      // Get or create customer
-      let { data: customer } = await supabase
-        .from('customers')
-        .select('id')
-        .eq('user_id', userData.user?.id)
-        .single()
-
-      if (!customer) {
-        // Create customer
-        const { data: newCustomer, error: customerError } = await supabase
-          .from('customers')
-          .insert({
-            user_id: userData.user?.id,
-            full_name: userData.user?.user_metadata?.full_name || 'Guest',
-            email: userData.user?.email || 'guest@email.com'
-          })
-          .select('id')
-          .single()
-
-        if (customerError) throw customerError
-        customer = newCustomer
-      }
-
-      const { data, error } = await supabase.rpc('get_budget_recommendations', {
-        p_customer_id: customer?.id,
-        p_budget_min: parseFloat(budgetMin),
-        p_budget_max: parseFloat(budgetMax),
-        p_num_travelers: parseInt(numTravelers) || 2,
-        p_preferences: {}
+      // Call AI-powered budget recommendations API
+      const response = await fetch(`${API_BASE_URL}/api/v1/budget/recommendations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          budget_min: parseFloat(budgetMin),
+          budget_max: parseFloat(budgetMax),
+          num_travelers: parseInt(numTravelers) || 2,
+          preferences: {},
+          duration_days: 5
+        })
       })
 
-      if (error) throw error
+      if (!response.ok) {
+        throw new Error('Failed to fetch recommendations')
+      }
 
-      if (!data || data.length === 0) {
-        Alert.alert('No Results', 'No packages found in your budget range. Try adjusting your filters.')
+      const data: BudgetResponse = await response.json()
+
+      if (!data.success || !data.packages || data.packages.length === 0) {
+        Alert.alert(
+          'No Results',
+          'No packages found in your budget range. Try adjusting your filters.'
+        )
       } else {
-        setPackages(data)
+        setPackages(data.packages)
+        setBudgetAnalysis(data.budget_analysis)
+        setAiInsights(data.ai_insights)
+
+        Alert.alert(
+          '✨ AI Recommendations Ready!',
+          `Found ${data.total_found} amazing packages for you!\n\n${data.budget_analysis}`,
+          [{ text: 'Explore', style: 'default' }]
+        )
       }
     } catch (error: any) {
       console.error('Budget search error:', error)
-      Alert.alert('Error', error.message || 'Failed to search packages. Please try again.')
+      Alert.alert(
+        'Error',
+        'Failed to get recommendations. Please check your connection and try again.'
+      )
     } finally {
       setLoading(false)
     }
@@ -113,10 +132,10 @@ export default function BudgetPackages() {
           </TouchableOpacity>
           <View className="flex-1">
             <Text className="text-2xl font-bold text-white mb-1">
-              Budget Smart
+              💰 Budget Smart
             </Text>
             <Text className="text-sm text-blue-100">
-              Find packages within your budget
+              AI-powered package recommendations
             </Text>
           </View>
           <Ionicons name="wallet" size={32} color="#ffffff" />
@@ -203,6 +222,25 @@ export default function BudgetPackages() {
               </LinearGradient>
             </TouchableOpacity>
           </View>
+
+          {/* AI Insights Banner */}
+          {aiInsights && (
+            <View className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-4 mb-4 border border-purple-200">
+              <View className="flex-row items-start">
+                <View className="bg-purple-100 rounded-full p-2 mr-3">
+                  <Ionicons name="bulb" size={20} color="#7c3aed" />
+                </View>
+                <View className="flex-1">
+                  <Text className="text-sm font-bold text-purple-900 mb-1">
+                    💡 AI Travel Insight
+                  </Text>
+                  <Text className="text-sm text-purple-700">
+                    {aiInsights}
+                  </Text>
+                </View>
+              </View>
+            </View>
+          )}
 
           {/* Results */}
           {packages.length > 0 && (
