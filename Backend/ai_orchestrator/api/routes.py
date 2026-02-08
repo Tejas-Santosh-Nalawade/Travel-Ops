@@ -12,6 +12,7 @@ from models.schemas import (
 from agents.orchestrator import TravelOrchestratorAgent
 from services.groq_service import groq_service
 from api.simulation import router as simulation_router
+from api.budget import router as budget_router
 
 
 # Initialize FastAPI app
@@ -35,6 +36,13 @@ app.include_router(
     simulation_router,
     prefix="/api/v1/transactions",
     tags=["Transaction Simulation"]
+)
+
+# Include budget router for AI-powered budget recommendations
+app.include_router(
+    budget_router,
+    prefix="/api/v1/budget",
+    tags=["Budget Recommendations"]
 )
 
 # In-memory storage for simulations (use Redis in production)
