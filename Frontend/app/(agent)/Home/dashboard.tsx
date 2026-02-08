@@ -20,9 +20,9 @@ export default function AgentDashboard() {
   const [loading, setLoading] = useState(true);
   const fadeAnim = useState(new Animated.Value(0))[0];
   const [stats, setStats] = useState({
-    active: 0,
-    escalated: 0,
-    completed: 0,
+    active: 2,
+    escalated: 1,
+    completed: 5,
   });
   const [recentJourneys, setRecentJourneys] = useState<any[]>([]);
 
