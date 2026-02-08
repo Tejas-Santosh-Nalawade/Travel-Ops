@@ -42,11 +42,12 @@ export default function AgentLayout() {
       />
 
       <Tabs.Screen
-        name="Create"
+        name="ai-planner"
         options={{
-          title: "Create",
+          title: "AI Planner",
+          href: "/(agent)/Home/ai-recommendations",
           tabBarIcon: ({ color }) => (
-            <Ionicons name="add-circle" size={30} color={color} />
+            <Ionicons name="sparkles" size={28} color={color} />
           ),
         }}
       />

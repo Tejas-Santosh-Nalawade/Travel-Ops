@@ -152,27 +152,32 @@ export default function AgentDashboard() {
 
             {/* Action Buttons Grid */}
             <View className="flex-row flex-wrap -mx-2">
-              {/* Create Journey */}
-              <View className="w-1/2 px-2 mb-3">
+              {/* AI Planner - PRIMARY */}
+              <View className="w-full px-2 mb-4">
                 <TouchableOpacity
-                  onPress={() => router.push("/Create/create")}
+                  onPress={() => router.push("/(agent)/Home/ai-recommendations")}
                   activeOpacity={0.8}
                 >
                   <LinearGradient
-                    colors={["#3b82f6", "#2563eb"]}
-                    className="rounded-2xl p-4 shadow-lg"
+                    colors={["#ec4899", "#db2777"]}
+                    className="rounded-3xl p-6 shadow-xl"
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
-                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
-                      <Ionicons name="add-circle" size={28} color="#ffffff" />
+                    <View className="flex-row items-center justify-between">
+                      <View className="flex-1">
+                        <View className="w-14 h-14 rounded-2xl bg-white/20 items-center justify-center mb-3">
+                          <Ionicons name="sparkles" size={32} color="#ffffff" />
+                        </View>
+                        <Text className="text-white font-black text-2xl">
+                          AI Planner
+                        </Text>
+                        <Text className="text-pink-100 text-sm mt-1 font-medium">
+                          Design custom journeys with intelligent recommendations
+                        </Text>
+                      </View>
+                      <Ionicons name="chevron-forward" size={32} color="#ffffff50" />
                     </View>
-                    <Text className="text-white font-bold text-base">
-                      New Journey
-                    </Text>
-                    <Text className="text-blue-100 text-xs mt-1">
-                      Create booking
-                    </Text>
                   </LinearGradient>
                 </TouchableOpacity>
               </View>
@@ -189,8 +194,8 @@ export default function AgentDashboard() {
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
-                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
-                      <Ionicons name="wallet-outline" size={28} color="#ffffff" />
+                    <View className="w-10 h-10 rounded-xl bg-white/30 items-center justify-center mb-2">
+                      <Ionicons name="wallet-outline" size={24} color="#ffffff" />
                     </View>
                     <Text className="text-white font-bold text-base">
                       Budget
@@ -214,8 +219,8 @@ export default function AgentDashboard() {
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
-                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
-                      <Ionicons name="card" size={28} color="#ffffff" />
+                    <View className="w-10 h-10 rounded-xl bg-white/30 items-center justify-center mb-2">
+                      <Ionicons name="card" size={24} color="#ffffff" />
                     </View>
                     <Text className="text-white font-bold text-base">
                       Credit Cards
@@ -227,53 +232,26 @@ export default function AgentDashboard() {
                 </TouchableOpacity>
               </View>
 
-              {/* AI Orchestrator */}
-              <View className="w-1/2 px-2 mb-3">
-                <TouchableOpacity
-                  onPress={() => router.push("/(agent)/Home/ai-recommendations")}
-                  activeOpacity={0.8}
-                >
-                  <LinearGradient
-                    colors={["#ec4899", "#db2777"]}
-                    className="rounded-2xl p-4 shadow-lg"
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
-                      <Ionicons name="sparkles" size={28} color="#ffffff" />
-                    </View>
-                    <Text className="text-white font-bold text-base">
-                      AI Planner
-                    </Text>
-                    <Text className="text-pink-100 text-xs mt-1">
-                      Custom trips
-                    </Text>
-                  </LinearGradient>
-                </TouchableOpacity>
-              </View>
-
               {/* View Journeys */}
-              <View className="w-1/2 px-2 mb-3">
+              <View className="w-full px-2 mb-3">
                 <TouchableOpacity
                   onPress={() => router.push("/(agent)/Journey/journeys")}
                   activeOpacity={0.8}
                 >
-                  <LinearGradient
-                    colors={["#22c55e", "#16a34a"]}
-                    className="rounded-2xl p-4 shadow-lg"
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 1 }}
-                  >
-                    <View className="w-12 h-12 rounded-full bg-white/30 items-center justify-center mb-2">
-                      <Ionicons name="list" size={28} color="#ffffff" />
+                  <View className="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex-row items-center justify-between">
+                    <View className="flex-row items-center">
+                      <View className="w-12 h-12 rounded-full bg-blue-50 items-center justify-center mr-4">
+                        <Ionicons name="list" size={24} color="#2563eb" />
+                      </View>
+                      <View>
+                        <Text className="text-gray-900 font-bold text-base">
+                          Manage Journeys
+                        </Text>
+                        <Text className="text-gray-500 text-xs">View and track all customer bookings</Text>
+                      </View>
                     </View>
-                    <Text className="text-white font-bold text-base">
-                      Journeys
-                    </Text>
-                    <Text className="text-green-100 text-xs mt-1">
-                      View all
-                    </Text>
-                  </LinearGradient>
+                    <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>

@@ -86,7 +86,7 @@ export default function Journeys() {
             <Text className="text-sm text-gray-500 mt-1">{journeys.length} total journeys</Text>
           </View>
           <TouchableOpacity
-            onPress={() => router.push("/(agent)/Create/create")}
+            onPress={() => router.push("/(agent)/Home/ai-recommendations")}
             className="bg-blue-600 rounded-xl px-4 py-2 flex-row items-center gap-2"
           >
             <Ionicons name="add-circle" size={20} color="#ffffff" />
