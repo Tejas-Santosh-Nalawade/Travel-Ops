@@ -18,6 +18,32 @@
 
 ---
 
+## ⚡ Quick Start (≈10 minutes)
+
+| Service | Folder | Port | Start |
+|---------|--------|------|-------|
+| AI Orchestrator (FastAPI + Groq) | `Backend/ai_orchestrator` | 8000 | `uvicorn main:app --host 0.0.0.0 --port 8000` |
+| Credit Card service (FastAPI) | `Backend/credit_cards` | 8001 | `uvicorn main:app --host 0.0.0.0 --port 8001` |
+| Mobile app (Expo / React Native) | `Frontend` | 8081 | `npx expo start` |
+
+```bash
+# 1. Backends (repeat in each backend folder)
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
+pip install -r requirements.txt
+cp .env.example .env        # ai_orchestrator: set GROQ_API_KEY (+ Supabase values)
+
+# 2. Database: run the SQL in Backend/database in your Supabase project (see Installation step 2)
+
+# 3. Mobile app
+cd Frontend && npm install
+cp .env.example .env        # set Supabase URL/key and your computer's LAN IP for the API URLs
+npx expo start              # scan the QR with Expo Go (phone and PC on the same Wi-Fi)
+```
+
+**Data flow:** mobile app → Supabase (auth, data, realtime) and mobile app → FastAPI → Groq LLM → Supabase.
+Never commit `.env` files or API keys; use the `.env.example` templates.
+To build an installable Android APK: `cd Frontend && npx eas build -p android --profile preview`.
+
 ## 📋 Table of Contents
 
 1. [Problem Statement](#-problem-statement)
@@ -32,6 +58,7 @@
 10. [Innovation Highlights](#-innovation-highlights)
 11. [Team](#-team)
 12. [Future Roadmap](#-future-roadmap)
+13. [DPLC](#-dplc---development--product-life-cycle)
 
 ---
 
@@ -446,7 +473,7 @@ Triggers:
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/your-org/melt-down.git
+git clone https://github.com/Tejas-Santosh-Nalawade/Melt_Down.git
 cd melt-down
 ```
 
@@ -590,7 +617,9 @@ cp .env.example .env
 
 # Edit .env with your Supabase credentials
 EXPO_PUBLIC_SUPABASE_URL=your-supabase-project-url
-EXPO_PUBLIC_SUPABASE_ANON_KEY=your-supabase-anon-key
+EXPO_PUBLIC_SUPABASE_KEY=your-supabase-anon-key
+EXPO_PUBLIC_API_URL=http://<your-computer-ip>:8000
+EXPO_PUBLIC_CREDIT_API_URL=http://<your-computer-ip>:8001
 ```
 
 #### 4.3 Update AI Agent IP (Important!)
@@ -643,6 +672,19 @@ npm start
 3. Check Supabase for confirmation email
 
 ---
+
+## 🔄 DPLC - Development & Product Life Cycle
+
+Design and presentation: [Canva DPLC deck](https://www.canva.com/design/DAHApX7j9v4/A8maVIZLdyQIEfwvSY__sw/edit)
+
+| Phase | What we do | Where in this repo |
+|-------|-----------|--------------------|
+| 1. Plan | Define problem, roles (Agent / Ops / Admin), scope | [Problem Statement](#-problem-statement), `TravelOps.pptx` |
+| 2. Design | Architecture, data model, UX flows | [ARCHITECTURE.md](ARCHITECTURE.md), `Backend/database/` |
+| 3. Build | Supabase schema, FastAPI agents, Expo mobile app | `Backend/`, `Frontend/` |
+| 4. Test | API test scripts, simulation of failures, lint | `Backend/ai_orchestrator/test_*.py`, `npm run lint` |
+| 5. Deploy | Backend on any Python host, mobile via EAS build | `Frontend/eas.json` |
+| 6. Monitor & Iterate | DLQ and rollback dashboards, feedback, roadmap | [Future Roadmap](#-future-roadmap) |
 
 ## 🎮 How It Works
 
@@ -1012,7 +1054,7 @@ Response:
 | **Architecture** | ⭐⭐⭐⭐⭐ | Microservices, saga pattern, dual backend |
 | **User Experience** | ⭐⭐⭐⭐⭐ | Beautiful UI, real-time updates, mobile-first |
 | **Scalability** | ⭐⭐⭐⭐ | Cloud-native, async processing, efficient DB |
-| **Production Ready** | ⭐⭐⭐⭐⭐ | Error handling, monitoring, security, tests |
+| **Production Ready** | ⭐⭐⭐⭐ | Error handling, DLQ monitoring, RLS-ready schema |
 
 ---
 
@@ -1068,7 +1110,7 @@ Response:
 
 - **API Documentation**: http://localhost:8000/docs
 - **ReDoc**: http://localhost:8000/redoc
-- **GitHub Repository**: [https://github.com/your-org/melt-down](#)
+- **GitHub Repository**: [https://github.com/Tejas-Santosh-Nalawade/Melt_Down](https://github.com/Tejas-Santosh-Nalawade/Melt_Down)
 - **Demo Video**: [YouTube Link](#)
 - **Presentation Slides**: [Google Slides Link](#)
 
@@ -1076,23 +1118,17 @@ Response:
 
 ## 🤝 Contributing
 
-We welcome contributions! Please see our [Contributing Guide](CONTRIBUTING.md).
+We welcome contributions! Branch from `main`, keep PRs small, and run `npm run lint` before pushing.
 
 ### Development Setup
 
 ```bash
 # Clone repo
-git clone https://github.com/your-org/melt-down.git
+git clone https://github.com/Tejas-Santosh-Nalawade/Melt_Down.git
 
-# Install pre-commit hooks
-pre-commit install
-
-# Run tests
-cd Backend/ai_orchestrator
-pytest
-
-cd ../../Frontend
-npm test
+# Lint the mobile app
+cd Frontend
+npm run lint
 ```
 
 ---
@@ -1144,9 +1180,6 @@ If you find this project helpful or innovative, please star the repository!
 - [x] ✅ API documentation
 - [x] ✅ Innovation highlights
 
-**Total Lines of Code**: 15,000+
-**Files**: 150+
-**Test Coverage**: 85%
 **API Response Time**: < 2 seconds
 **Mobile Performance**: 60 FPS
 

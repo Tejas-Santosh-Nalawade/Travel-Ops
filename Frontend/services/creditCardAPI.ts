@@ -5,7 +5,8 @@
 import axios from 'axios';
 
 // Configuration
-const CREDIT_API_URL = 'http://10.243.165.242:8001';  // Update with your IP
+const CREDIT_API_URL =
+  process.env.EXPO_PUBLIC_CREDIT_API_URL || 'http://localhost:8001';
 
 // Types
 export interface CreditCard {
