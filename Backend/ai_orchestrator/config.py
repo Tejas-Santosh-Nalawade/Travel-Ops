@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     # AI Models (optional - for future integration)
     OPENAI_API_KEY: Optional[str] = None
     ANTHROPIC_API_KEY: Optional[str] = None
-    GROQ_API_KEY: Optional[str] = "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"
+    GROQ_API_KEY: Optional[str] = None  # Required: set in .env
 
     # Social Media APIs
     YOUTUBE_API_KEY: Optional[str] = None  # Get from https://console.cloud.google.com/
